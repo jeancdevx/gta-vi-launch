@@ -1,0 +1,137 @@
+{
+  "checkedAt": "2026-11-18T21:28:25.450Z",
+  "assets": [
+    {
+      "key": "hero",
+      "file": "images/hero-key-background.webp",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/hero-key-background.webp",
+      "source": "Midudev / Rockstar Games",
+      "role": "Arte de portada por capas",
+      "status": "local",
+      "bytes": 1480164,
+      "sha256": "9542e6d1da5e6ab6239cdb1383d24b778fa8df3d5d82a62eea39c0ff3f766030"
+    },
+    {
+      "key": "heroLogo",
+      "file": "images/hero-key-logo.webp",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/hero-key-logo.webp",
+      "source": "Midudev / Rockstar Games",
+      "role": "Logo y composición de portada",
+      "status": "local",
+      "bytes": 36474,
+      "sha256": "fee85e49b46d5b56b8e975badf5c88cbafd7bdda5f38a6d5e00829fb2912a8d3"
+    },
+    {
+      "key": "logo",
+      "file": "images/logo-stack.svg",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/public/logo-stack.svg",
+      "source": "Midudev / Rockstar Games",
+      "role": "Logo oficial apilado",
+      "status": "local",
+      "bytes": 2365,
+      "sha256": "f9613801de8d2887b50221e6afcd3539bc48bd9829d56052469ec39554e94146"
+    },
+    {
+      "key": "vi",
+      "file": "images/logo-vi.svg",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/logo-vi.svg",
+      "source": "Midudev / Rockstar Games",
+      "role": "Monograma VI",
+      "status": "local",
+      "bytes": 831,
+      "sha256": "bece2fb3e425082b5452ddb6e6a47e2c880c083fb490b42e38c2bb5fdce2854f"
+    },
+    {
+      "key": "fullLogo",
+      "file": "images/full-logo.webp",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/full-logo.webp",
+      "source": "Midudev / Rockstar Games",
+      "role": "Logo completo",
+      "status": "local",
+      "bytes": 21342,
+      "sha256": "a43b2ea7b7952266640d8c9d0c07e86881ede6e12b2d50bf7945752c92dcfeea"
+    },
+    {
+      "key": "ps5",
+      "file": "images/ps5.svg",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/ps5.svg",
+      "source": "Midudev / Sony",
+      "role": "PlayStation 5",
+      "status": "local",
+      "bytes": 2367,
+      "sha256": "377b8062ba375f726e3089ff7dc6e582ae9bb8af06989108ae6ab78837a98f42"
+    },
+    {
+      "key": "xbox",
+      "file": "images/xbox.svg",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/src/assets/xbox.svg",
+      "source": "Midudev / Microsoft",
+      "role": "Xbox Series X|S",
+      "status": "local",
+      "bytes": 7050,
+      "sha256": "224359f3ba9eb29bf17b0af2cdc20f0123bb753620aba2af00454e3f906d8ba7"
+    },
+    {
+      "key": "rooftop",
+      "file": "images/jason-lucia-rooftop.jpg",
+      "url": "https://www.rockstargames.com/VI/_next/static/media/Jason_Lucia_Rooftop_landscape.0c6p5do~-8~7..jpg?imwidth=1920",
+      "source": "Rockstar Games / VI media",
+      "role": "Jason y Lucia, rooftop",
+      "status": "local",
+      "bytes": 1865556,
+      "sha256": "73be5d427997f180c120c1a98d4ead6a131a671a0c94c66ddfe912199b58429a"
+    },
+    {
+      "key": "viceCity",
+      "file": "images/vice-city.jpg",
+      "url": "https://www.rockstargames.com/VI/_next/static/media/Vice_City_27.0d2e~w_r93hmh.jpg?imwidth=1920",
+      "source": "Rockstar Games / VI media",
+      "role": "Vice City 27",
+      "status": "local",
+      "bytes": 1132950,
+      "sha256": "f0725fd61298ccfe7de30328ecf1651f7455eaf122a0b2f66031b819dd45d0e1"
+    },
+    {
+      "key": "jasonLucia",
+      "file": "images/jason-lucia.jpg",
+      "url": "https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_14.10e7v.06pcm_t.jpg?imwidth=1920",
+      "source": "Rockstar Games / VI media",
+      "role": "Jason y Lucia 14",
+      "status": "local",
+      "bytes": 1017759,
+      "sha256": "1214224b9e6c20e1abcb459b57448356f3715f93ba561f5c2a59dfb952ba6c57"
+    },
+    {
+      "key": "font:gta-bold.woff",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/public/fonts/gta-bold.woff",
+      "file": "fonts/gta-bold.woff",
+      "status": "local",
+      "bytes": 60568,
+      "sha256": "c81f81f439608e03f041f1c655c9a51e1c0363b6c3f743937f938bbdd68c982a"
+    },
+    {
+      "key": "font:gta-narrow.woff",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/public/fonts/gta-narrow.woff",
+      "file": "fonts/gta-narrow.woff",
+      "status": "local",
+      "bytes": 58116,
+      "sha256": "ff0fbae40a08a1ea627c9ee093aea1af5c6bff738fb3f29ade9a1275eebfb212"
+    },
+    {
+      "key": "font:gta-regular.woff",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/public/fonts/gta-regular.woff",
+      "file": "fonts/gta-regular.woff",
+      "status": "local",
+      "bytes": 59580,
+      "sha256": "497851c4eecc120f1329112cb50057a8445c19d80a308a3a20d271fa60dfbaa3"
+    },
+    {
+      "key": "font:gta-semibold.woff",
+      "url": "https://raw.githubusercontent.com/midudev/landing-gta-vi/main/public/fonts/gta-semibold.woff",
+      "file": "fonts/gta-semibold.woff",
+      "status": "local",
+      "bytes": 61004,
+      "sha256": "f8cf0a8d2d0baa8984280a740b8ca6589e0d245fe93b751acaf188d56a598b7c"
+    }
+  ]
+}
