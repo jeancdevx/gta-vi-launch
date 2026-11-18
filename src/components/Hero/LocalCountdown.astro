@@ -1,0 +1,51 @@
+---
+import RegionPicker from '@/components/RegionPicker'
+---
+
+<aside class='local-countdown' id='mi-region' aria-labelledby='local-heading'>
+  <div class='countdown-top'>
+    <span class='eyebrow' id='local-heading'>
+      TU PRÓXIMA PARADA
+    </span>
+    <span class='local-status' id='local-status'>
+      HORA LOCAL
+    </span>
+  </div>
+  <RegionPicker />
+  <p class='countdown-label' id='countdown-label'>
+    Para la medianoche del lanzamiento
+  </p>
+  <div
+    class='clock-digits'
+    role='timer'
+    aria-label='Tiempo hasta el lanzamiento'
+    id='hero-clock'
+  >
+    <div>
+      <span id='clock-hours'>··</span>
+      <small>HORAS</small>
+    </div>
+    <span class='clock-colon' aria-hidden='true'>
+      :
+    </span>
+    <div>
+      <span id='clock-minutes'>··</span>
+      <small>MINUTOS</small>
+    </div>
+    <span class='clock-colon' aria-hidden='true'>
+      :
+    </span>
+    <div>
+      <span id='clock-seconds'>··</span>
+      <small>SEGUNDOS</small>
+    </div>
+  </div>
+  <p id='local-release' class='countdown-date'>
+    19 NOV 2026 · 00:00 · America/Lima
+  </p>
+  <p class='clock-note'>
+    Según el horario regional de Rockstar. Confirma el desbloqueo en la tienda
+    de tu cuenta.
+  </p>
+  <p class='sr-only' id='selection-feedback' role='status'></p>
+</aside>

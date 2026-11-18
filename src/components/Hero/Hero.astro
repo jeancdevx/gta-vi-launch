@@ -1,0 +1,76 @@
+---
+import { asset } from '@/helpers/assets.helpers'
+
+import LocalCountdown from './LocalCountdown.astro'
+---
+
+<section class='hero' aria-labelledby='hero-title'>
+  <div class='hero-art' aria-hidden='true'>
+    <img
+      src={asset('hero')}
+      alt=''
+      width='1920'
+      height='1080'
+      fetchpriority='high'
+      class='hero-background'
+    />
+    <div class='hero-shade'></div>
+  </div>
+  <div class='hero-content wrap'>
+    <div class='hero-copy'>
+      <p class='eyebrow hero-eyebrow'>
+        <span class='tiny-star'>✦</span> EL MUNDO TIENE UNA CITA CON VICE CITY
+      </p>
+      <img
+        class='hero-game-logo'
+        src={asset('fullLogo')}
+        width='160'
+        height='140'
+        alt='Grand Theft Auto VI'
+      />
+      <h1
+        id='hero-title'
+        class='text-8xl max-[1150px]:text-7xl max-[600px]:text-6xl max-[359px]:text-5xl min-[1600px]:text-9xl'
+      >
+        La espera
+        <br />
+        <span>termina.</span>
+      </h1>
+      <p class='hero-description'>
+        Una nueva era. Una medianoche a la vez.
+        <br />
+        Sigue la llegada de GTA VI, país por país.
+      </p>
+      <a class='button button-primary' href='#mi-region'>
+        Ver mi país{' '}
+        <svg
+          viewBox='0 0 24 24'
+          width='20'
+          height='20'
+          fill='none'
+          stroke='currentColor'
+          stroke-width='1.6'
+          aria-hidden='true'
+        >
+          <circle cx='12' cy='12' r='8' />
+          <path d='M12 7v10M7 12h10' />
+        </svg>
+      </a>
+      <div class='platforms'>
+        <span>PLAYSTATION 5</span>
+        <span class='platform-separator'>/</span>
+        <span>XBOX SERIES X|S</span>
+      </div>
+    </div>
+    <LocalCountdown />
+  </div>
+  <div class='hero-bottom wrap'>
+    <a href='#paises' class='scroll-cue'>
+      <span class='scroll-line' aria-hidden='true'></span> EL LANZAMIENTO, EN
+      TIEMPO REAL
+    </a>
+    <span class='hero-coordinates'>
+      VICE CITY, LEONIDA <span>25°46′ N 80°12′ W</span>
+    </span>
+  </div>
+</section>
