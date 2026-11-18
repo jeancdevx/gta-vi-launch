@@ -1,0 +1,78 @@
+---
+import BaseLayout from '@/components/BaseLayout'
+import { release } from '@/constants'
+---
+
+<BaseLayout title='Créditos y privacidad · GTA VI Launch'>
+  <main class='legal-page wrap' id='contenido'>
+    <a href='/' class='text-link'>
+      Volver al lanzamiento
+    </a>
+    <p class='eyebrow accent'>GTA VI LAUNCH</p>
+    <h1>
+      Hecho por fans.
+      <br />
+      Con las fuentes a la vista.
+    </h1>
+    <h2>Horarios</h2>
+    <p>
+      La fecha y la regla de medianoche local proceden del{' '}
+      <a href={release.source}>artículo de Rockstar Support</a>, consultado el{' '}
+      {release.verifiedAt}. Los instantes se calculan con zonas IANA y las
+      reglas de horario de verano de tu navegador. Cada país muestra una ciudad
+      de referencia; una tienda puede aplicar una única ventana a todo un país.
+      Confirma siempre el contador de la cuenta en la que compraste el juego.
+    </p>
+    <h2>Identidad visual y créditos</h2>
+    <p>
+      Grand Theft Auto VI, sus logotipos, imágenes y tipografías son propiedad
+      de sus respectivos titulares. Este es un proyecto de fans independiente,
+      sin afiliación ni respaldo de Rockstar Games o Take Two Interactive. El
+      arte se referencia desde la{' '}
+      <a href='https://www.rockstargames.com/VI/media'>
+        galería oficial de Rockstar
+      </a>{' '}
+      y el{' '}
+      <a href='https://github.com/midudev/landing-gta-vi'>
+        repositorio educativo de Midudev
+      </a>
+      . Consulta docs/IDENTIDAD-VISUAL.md en el proyecto para el inventario y la
+      procedencia.
+    </p>
+    <h2>Privacidad</h2>
+    <p>
+      Esta página no utiliza analítica ni solicita tu ubicación geográfica.
+      Puede guardar el país y la zona que eliges en el almacenamiento local de
+      tu navegador. Usa el botón de abajo para borrar esa preferencia. Si los
+      assets aún no están descargados localmente, el navegador los solicita a
+      GitHub o Rockstar, que reciben los datos habituales de una petición web.
+    </p>
+    <button type='button' class='button button-secondary' id='forget-region'>
+      Borrar mi región guardada
+    </button>
+    <p id='forget-feedback' role='status'></p>
+    <h2>Uso del seguimiento</h2>
+    <p>
+      Los contadores son informativos y dependen de la hora de tu dispositivo.
+      No verifican el estado de servidores, licencias, cuentas o copias físicas.
+      La cobertura es un listado seleccionado de países y zonas de referencia,
+      no un catálogo de todas las tiendas del mundo.
+    </p>
+  </main>
+  <script>
+    document.querySelector('#forget-region')?.addEventListener('click', () => {
+      const feedback = document.querySelector('#forget-feedback')
+
+      try {
+        localStorage.removeItem('gta-vi-region')
+
+        if (feedback)
+          feedback.textContent = 'Tu preferencia guardada se ha eliminado.'
+      } catch {
+        if (feedback)
+          feedback.textContent =
+            'El navegador no permite acceder al almacenamiento. Puedes borrarlo desde los ajustes del sitio.'
+      }
+    })
+  </script>
+</BaseLayout>
