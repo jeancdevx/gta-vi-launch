@@ -3,29 +3,50 @@ import { release } from '@/constants'
 import { asset } from '@/helpers/assets.helpers'
 ---
 
-<footer class='site-footer wrap'>
-  <div class='footer-brand'>
+<footer class='wrap border-t border-line pt-12 pb-8 max-[600px]:pt-8'>
+  <div class='flex items-center gap-6 max-[600px]:gap-4'>
     <img
       src={asset('fullLogo')}
       width='64'
       height='64'
       alt='Grand Theft Auto VI'
+      loading='lazy'
+      decoding='async'
+      class='h-16 w-16 object-contain max-[600px]:h-12 max-[600px]:w-12'
     />
     <div>
-      <strong>Nos vemos en Vice City.</strong>
-      <p>Un seguimiento hecho por fans, para fans.</p>
+      <strong class='text-2xl leading-8 font-medium max-[600px]:text-lg max-[600px]:leading-7'>
+        Nos vemos en Vice City.
+      </strong>
+      <p class='mt-2 text-sm leading-5 text-muted max-[600px]:mt-1 max-[600px]:text-xs'>
+        Proyecto independiente. Sin cuentas ni analítica.
+      </p>
     </div>
   </div>
-  <div class='footer-bottom'>
-    <p>
+
+  <div class='mt-12 flex items-end justify-between gap-12 text-xs leading-4 text-[#b3aabf] max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-6 max-[600px]:mt-8'>
+    <p class='max-w-[550px]'>
       Proyecto no oficial. GTA VI y sus assets pertenecen a Rockstar Games y
       Take Two Interactive.
     </p>
-    <div>
-      <a href='/acerca/'>Créditos y privacidad</a>
-      <a href={release.source} target='_blank' rel='noopener noreferrer'>
+    <nav
+      aria-label='Legal y fuentes'
+      class='flex shrink-0 gap-6 max-[600px]:flex-wrap'
+    >
+      <a
+        href='/acerca/'
+        class='py-2 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
+      >
+        Créditos y privacidad
+      </a>
+      <a
+        href={release.source}
+        target='_blank'
+        rel='noopener noreferrer'
+        class='py-2 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
+      >
         Fuente oficial
       </a>
-    </div>
+    </nav>
   </div>
 </footer>
