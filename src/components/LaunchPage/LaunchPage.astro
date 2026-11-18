@@ -6,9 +6,19 @@ import LaunchTracker from '@/components/LaunchTracker'
 import SiteFooter from '@/components/SiteFooter'
 import SiteHeader from '@/components/SiteHeader'
 import ViceMoment from '@/components/ViceMoment'
+import { asset } from '@/helpers/assets.helpers'
 ---
 
 <BaseLayout>
+  <Fragment slot='head'>
+    <link
+      rel='preload'
+      as='image'
+      href={asset('hero')}
+      type='image/webp'
+      fetchpriority='high'
+    />
+  </Fragment>
   <SiteHeader />
   <main id='contenido'>
     <Hero />

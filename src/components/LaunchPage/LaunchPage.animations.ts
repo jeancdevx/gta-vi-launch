@@ -45,9 +45,7 @@ async function initializeMotion() {
         }
       })
 
-      for (const element of document.querySelectorAll(
-        '.section-top, .world-overview, .steps, .faq'
-      )) {
+      for (const element of document.querySelectorAll('[data-reveal]')) {
         gsap.from(element, {
           y: 24,
           opacity: 0,
