@@ -76,5 +76,5 @@ export function asset(name: keyof typeof assetCatalog): string {
 }
 
 export const hasLocalFonts = existsSync(
-  resolve(process.cwd(), 'public/fonts/gta-regular.font')
+  resolve(process.cwd(), 'public/fonts/gta-regular.woff')
 )

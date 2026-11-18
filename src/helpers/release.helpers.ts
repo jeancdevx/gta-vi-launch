@@ -62,6 +62,23 @@ export function clockState(instant: number, now: number = Date.now()) {
   }
 }
 
+/** Human-readable offset at the release instant, e.g. UTC−05:00. */
+export function utcOffsetLabel(
+  zone: string,
+  date: string = release.date
+): string {
+  const instant = releaseInstant(zone, date)
+  const name =
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: zone,
+      timeZoneName: 'longOffset'
+    })
+      .formatToParts(instant)
+      .find(part => part.type === 'timeZoneName')?.value ?? 'GMT'
+
+  return name === 'GMT' ? 'UTC' : name.replace('GMT', 'UTC').replace('-', '−')
+}
+
 export function durationLabel(
   instant: number,
   now: number = Date.now()
