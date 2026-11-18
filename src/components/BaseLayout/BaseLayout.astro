@@ -1,0 +1,68 @@
+---
+import { asset, hasLocalFonts } from '@/helpers/assets.helpers'
+
+import '@/styles/global.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const {
+  title = 'GTA VI · El mundo entra a Vice City',
+  description = 'Sigue el lanzamiento de GTA VI país por país. Consulta la cuenta regresiva en tu región y dónde ya llegó la medianoche del 19 de noviembre de 2026.'
+} = Astro.props
+---
+
+<!doctype html>
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta name='theme-color' content='#111019' />
+    <meta name='description' content={description} />
+    <meta name='robots' content='noindex, follow' />
+    <meta property='og:type' content='website' />
+    <meta property='og:locale' content='es_ES' />
+    <meta property='og:title' content={title} />
+    <meta property='og:description' content={description} />
+    <meta property='og:image' content={asset('hero')} />
+    <meta name='twitter:card' content='summary_large_image' />
+    <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+    <link
+      rel='preconnect'
+      href='https://raw.githubusercontent.com'
+      crossorigin
+    />
+    <link rel='preconnect' href='https://www.rockstargames.com' crossorigin />
+    {hasLocalFonts && (
+      <link
+        rel='preload'
+        href='/fonts/gta-regular.font'
+        as='font'
+        crossorigin
+      />
+    )}
+    {hasLocalFonts && <style is:global>
+      @font-face {
+        font-family: 'GTA Art Deco';
+        src: url('/fonts/gta-regular.font');
+        font-weight: 400 500;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'GTA Art Deco';
+        src: url('/fonts/gta-bold.font');
+        font-weight: 600 800;
+        font-display: swap;
+      }
+    </style>}
+    <title>{title}</title>
+  </head>
+  <body>
+    <a href='#contenido' class='skip-link'>
+      Saltar al contenido
+    </a>
+    <slot />
+  </body>
+</html>
