@@ -48,15 +48,46 @@ test('accent insensitive search, status filters and the empty state work togethe
 test('country, alternative zone and a shared URL preserve the selected countdown', async ({
   page
 }) => {
-  await page.locator('#region-select').selectOption('us')
+  await page.locator('#region-trigger').click()
+  await page
+    .locator('[data-region-option="us"][data-option-zone="America/New_York"]')
+    .click()
   await expect(page.locator('#extra-zone-wrap')).toBeVisible()
-  await page.locator('#zone-select').selectOption('America/Los_Angeles')
+  await page.locator('[data-zone-option="America/Los_Angeles"]').click()
   await expect(page.locator('#clock-hours')).toHaveText('16')
   await expect(page).toHaveURL(/zone=America%2FLos_Angeles/)
   await page.reload()
-  await expect(page.locator('#region-select')).toHaveValue('us')
-  await expect(page.locator('#zone-select')).toHaveValue('America/Los_Angeles')
+  await expect(page.locator('#region-trigger-country')).toHaveText(
+    'Estados Unidos'
+  )
+  await expect(page.locator('#region-trigger-city')).toContainText(
+    'Los Ángeles'
+  )
   await expect(page.locator('#clock-hours')).toHaveText('16')
+})
+
+test('the region picker filters by city and supports keyboard selection', async ({
+  page
+}) => {
+  const trigger = page.locator('#region-trigger')
+
+  await trigger.click()
+  await expect(page.locator('#region-panel')).toBeVisible()
+  await page.locator('#region-search').fill('los')
+  await expect(
+    page.locator('[data-option-zone="America/Los_Angeles"]')
+  ).toBeVisible()
+  await expect(page.locator('#region-result-count')).toHaveText('1')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('#region-trigger-city')).toContainText(
+    'Los Ángeles'
+  )
+  await expect(page.locator('#region-panel')).toBeHidden()
+
+  await trigger.click()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('#region-panel')).toBeHidden()
+  await expect(trigger).toBeFocused()
 })
 
 test('mobile and desktop layouts fit the viewport and keep the tracker usable', async ({
@@ -73,7 +104,9 @@ test('mobile and desktop layouts fit the viewport and keep the tracker usable', 
   }
 
   await page.locator('[data-choose-region="nz"]').click()
-  await expect(page.locator('#region-select')).toHaveValue('nz')
+  await expect(page.locator('#region-trigger-country')).toHaveText(
+    'Nueva Zelanda'
+  )
   await expect(page.locator('#countdown-label')).toHaveText(
     'Desde la medianoche del lanzamiento'
   )
