@@ -1,18 +1,25 @@
 ---
 import BaseLayout from '@/components/BaseLayout'
+import Button from '@/components/Button'
 ---
 
-<BaseLayout title='Fuera del mapa · GTA VI Launch'>
-  <main class='error-page' id='contenido'>
-    <p class='eyebrow accent'>404 · FUERA DEL MAPA</p>
-    <h1>
+<BaseLayout
+  title='Fuera del mapa · GTA VI Launch'
+  description='Esta dirección no lleva a Vice City. Vuelve al seguimiento del lanzamiento de GTA VI y encuentra tu país.'
+>
+  <main
+    class='flex min-h-svh flex-col items-center justify-center px-6 py-20 text-center'
+    id='contenido'
+  >
+    <p class='eyebrow text-vice'>404 · FUERA DEL MAPA</p>
+    <h1 class='mt-8 text-6xl leading-none tracking-[-0.04em] max-[600px]:text-4xl max-[600px]:leading-10'>
       Esta calle
       <br />
       no lleva a Vice City.
     </h1>
-    <p>Vuelve al lanzamiento y encuentra tu país.</p>
-    <a class='button button-primary' href='/'>
+    <p class='mt-6 text-muted'>Vuelve al lanzamiento y encuentra tu país.</p>
+    <Button href='/' variant='primary' class='mt-8'>
       Volver al lanzamiento
-    </a>
+    </Button>
   </main>
 </BaseLayout>
