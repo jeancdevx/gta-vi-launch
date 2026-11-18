@@ -1,44 +1,198 @@
 ---
-import { regions } from '@/constants'
+import Icon from '@/components/Icon'
+import { alternateZones, regions } from '@/constants'
+import { releaseInstant, utcOffsetLabel } from '@/helpers/release.helpers'
+
+const options = regions
+  .flatMap(region => {
+    const zones = [
+      { city: region.city, zone: region.zone, primary: true },
+      ...(alternateZones[region.id] ?? []).map(zone => ({
+        ...zone,
+        primary: false
+      }))
+    ]
+
+    return zones.map((entry, index) => ({
+      ...region,
+      ...entry,
+      optionId:
+        index === 0
+          ? `region-option-${region.id}`
+          : `region-option-${region.id}-${index}`,
+      offset: utcOffsetLabel(entry.zone)
+    }))
+  })
+  .sort(
+    (a, b) =>
+      releaseInstant(a.zone) - releaseInstant(b.zone) ||
+      a.country.localeCompare(b.country, 'es') ||
+      a.city.localeCompare(b.city, 'es')
+  )
 ---
 
-<label for='region-select' class='sr-only'>
-  Elige tu país o región
-</label>
-<div class='select-wrap'>
-  <select id='region-select' name='region'>
-    {regions.map(region => (
-      <option value={region.id} selected={region.id === 'pe'}>
-        {region.flag} {region.country} · {region.city}
-      </option>
-    ))}
-  </select>
-  <svg
-    viewBox='0 0 24 24'
-    width='20'
-    height='20'
-    fill='none'
-    stroke='currentColor'
-    stroke-width='1.5'
-    aria-hidden='true'
+<div class='relative' data-region-picker>
+  <button
+    type='button'
+    id='region-trigger'
+    class='mt-2 flex w-full items-center gap-3 border-b border-white/30 pb-3 text-left transition-colors duration-200 ease-out hover:border-vice focus-visible:outline-offset-4'
+    aria-haspopup='dialog'
+    aria-expanded='false'
+    aria-controls='region-panel'
   >
-    <path d='m6 9 6 6 6-6' />
-  </svg>
-</div>
-<div class='extra-zone-wrap' id='extra-zone-wrap' hidden>
-  <label for='zone-select'>Zona de referencia</label>
-  <div class='select-wrap'>
-    <select id='zone-select' name='zone'></select>
-    <svg
-      viewBox='0 0 24 24'
-      width='18'
-      height='18'
-      fill='none'
-      stroke='currentColor'
-      stroke-width='1.5'
+    <span
+      class='text-2xl leading-none'
+      id='region-trigger-flag'
       aria-hidden='true'
     >
-      <path d='m6 9 6 6 6-6' />
-    </svg>
+      🇵🇪
+    </span>
+    <span class='min-w-0 flex-1'>
+      <span
+        class='block truncate text-lg leading-6 font-semibold'
+        id='region-trigger-country'
+      >
+        Perú
+      </span>
+      <span
+        class='mt-0.5 block truncate text-xs leading-4 text-muted'
+        id='region-trigger-city'
+      >
+        Lima · América
+      </span>
+    </span>
+    <Icon name='chevron-down' class='size-5 shrink-0 text-vice' />
+  </button>
+
+  <div
+    id='region-backdrop'
+    class='fixed inset-0 z-40 bg-black/70'
+    data-open='false'
+  ></div>
+
+  <div
+    id='region-panel'
+    class='absolute bottom-full left-0 z-50 mb-3 w-[min(440px,calc(100vw-3rem))] border border-white/20 bg-[#15121d] shadow-[0_28px_90px_rgba(0,0,0,0.65)] max-[600px]:fixed max-[600px]:inset-x-3 max-[600px]:bottom-3 max-[600px]:mb-0 max-[600px]:max-h-[84svh] max-[600px]:w-auto'
+    role='dialog'
+    aria-labelledby='region-panel-title'
+    aria-describedby='region-panel-desc'
+    hidden
+  >
+    <div class='flex items-start justify-between gap-4 px-5 pt-5 pb-4'>
+      <div>
+        <h2
+          id='region-panel-title'
+          class='text-xl leading-6 font-semibold tracking-[-0.02em]'
+        >
+          Elige tu región
+        </h2>
+        <p id='region-panel-desc' class='mt-1 text-xs leading-4 text-muted'>
+          Elige una ciudad de referencia. Cada zona usa su hora local.
+        </p>
+      </div>
+      <button
+        type='button'
+        id='region-close'
+        class='-mt-1 grid size-11 shrink-0 place-items-center border border-white/15 text-muted transition-colors duration-150 ease-out hover:border-white/35 hover:text-ink focus-visible:outline-offset-2'
+        aria-label='Cerrar el selector de región'
+      >
+        <Icon name='x' class='size-5' />
+      </button>
+    </div>
+
+    <div class='flex items-center gap-3 border-y border-white/15 px-5'>
+      <Icon name='search' class='size-5 shrink-0 text-muted' />
+      <label class='sr-only' for='region-search'>
+        Buscar país o ciudad
+      </label>
+      <input
+        type='search'
+        id='region-search'
+        role='combobox'
+        aria-expanded='false'
+        aria-controls='region-listbox'
+        aria-autocomplete='list'
+        aria-activedescendant=''
+        autocomplete='off'
+        spellcheck='false'
+        placeholder='Busca Perú, Tokio, Oceanía…'
+        class='h-12 w-full min-w-0 border-0 bg-transparent p-0 text-base text-ink outline-none placeholder:text-[#a79eb3] focus-visible:outline-none'
+      />
+      <span
+        class='min-w-6 shrink-0 text-right text-xs text-muted tabular-nums'
+        id='region-result-count'
+      >
+        {options.length}
+      </span>
+    </div>
+
+    <ul
+      id='region-listbox'
+      class='h-[min(400px,52svh)] overflow-y-auto overscroll-contain py-1'
+      role='listbox'
+      aria-label='Países y ciudades de referencia'
+    >
+      {options.map(option => (
+        <li
+          role='option'
+          id={option.optionId}
+          data-region-option={option.id}
+          data-option-zone={option.zone}
+          data-country={option.country}
+          data-city={option.city}
+          data-continent={option.continent}
+          aria-selected={
+            option.primary && option.id === 'pe' ? 'true' : 'false'
+          }
+          class='group flex min-h-14 cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-2.5 transition-colors duration-100 ease-out hover:bg-white/[0.06] aria-selected:border-vice aria-selected:bg-vice/10 data-[active=true]:bg-white/[0.08]'
+        >
+          <span class='text-xl leading-none' aria-hidden='true'>
+            {option.flag}
+          </span>
+          <span class='min-w-0 flex-1'>
+            <span class='block truncate text-sm leading-5 font-semibold'>
+              {option.country}
+            </span>
+            <span class='block truncate text-xs leading-4 text-muted'>
+              {option.city} · {option.continent}
+            </span>
+          </span>
+          <span class='shrink-0 text-xs text-muted tabular-nums'>
+            {option.offset}
+          </span>
+          <Icon
+            name='check'
+            class='size-4 shrink-0 text-vice opacity-0 group-aria-selected:opacity-100'
+          />
+        </li>
+      ))}
+    </ul>
+
+    <p
+      id='region-empty'
+      class='grid h-[min(400px,52svh)] place-items-center px-5 text-center text-sm text-muted'
+      hidden
+    >
+      No encontramos ese país. Prueba con otra palabra.
+    </p>
+
+    <div class='flex items-center justify-between gap-4 border-t border-white/15 px-5 py-3 text-xs leading-4 text-muted'>
+      <span>
+        {regions.length} países · {options.length} zonas
+      </span>
+      <span>Medianoche local</span>
+    </div>
+  </div>
+
+  <div id='extra-zone-wrap' class='mt-3' hidden>
+    <p class='text-[0.625rem] font-semibold tracking-[0.18em] text-muted uppercase'>
+      Ciudad de referencia
+    </p>
+    <div
+      class='mt-2 flex flex-wrap gap-2'
+      id='zone-options'
+      role='group'
+      aria-label='Ciudad de referencia'
+    ></div>
   </div>
 </div>
