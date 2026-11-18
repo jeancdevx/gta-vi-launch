@@ -1,36 +1,52 @@
 ---
+import Button from '@/components/Button'
+import Icon from '@/components/Icon'
 import { asset } from '@/helpers/assets.helpers'
 ---
 
-<section class='vice-moment' aria-labelledby='moment-title'>
+<section
+  class='relative isolate flex min-h-[640px] items-center overflow-clip bg-[#211729] max-[600px]:min-h-[560px]'
+  aria-labelledby='moment-title'
+>
   <img
     src={asset('rooftop')}
     alt='Arte oficial de Jason y Lucia en una azotea de Vice City'
     width='1920'
     height='1080'
     loading='lazy'
+    decoding='async'
+    class='absolute inset-0 -z-20 h-full w-full object-cover object-center max-[600px]:object-[60%_center]'
   />
-  <div class='moment-shade'></div>
-  <div class='wrap moment-content'>
-    <p class='eyebrow'>EL DESTINO ES EL MISMO.</p>
-    <h2 id='moment-title' class='word-reveal'>
-      La misma ciudad.
+  <div class='absolute inset-0 -z-10 bg-gradient-to-r from-canvas/95 via-canvas/45 to-canvas/5'></div>
+  <div class='absolute inset-0 -z-10 bg-gradient-to-t from-canvas/60 via-transparent to-canvas/20'></div>
+
+  <div class='wrap py-20 max-[600px]:py-16'>
+    <p class='eyebrow text-peach'>CUANDO LLEGUE LA MEDIANOCHE.</p>
+    <h2
+      id='moment-title'
+      class='word-reveal mt-8 max-w-[680px] text-6xl leading-none font-semibold tracking-[-0.04em] max-[600px]:mt-6 max-[600px]:text-4xl max-[600px]:leading-10'
+    >
+      La ciudad es la misma.
       <br />
-      Millones de primeras veces.
+      La hora, no.
     </h2>
-    <p>
-      Cada país tiene su hora.
-      <br />
-      Todos llevamos años esperando este momento.
+    <p class='mt-6 max-w-[560px] text-lg leading-7 text-ink/80 max-[600px]:text-base max-[600px]:leading-6'>
+      Mientras esperas en tu zona, el lanzamiento ya empezó en otra parte del
+      mundo.
     </p>
-    <a
+    <Button
       href='https://www.rockstargames.com/VI'
       target='_blank'
       rel='noopener noreferrer'
-      class='button button-light'
+      variant='light'
+      class='mt-8 max-[600px]:mt-6'
     >
       Entrar al mundo de GTA VI
-    </a>
+      <Icon name='external' class='size-5' />
+    </Button>
   </div>
-  <span class='moment-caption'>JASON & LUCIA · LEONIDA, USA</span>
+
+  <span class='absolute right-12 bottom-6 text-xs tracking-[0.12em] text-[#dfd0e0] [text-shadow:0_1px_10px_rgba(0,0,0,0.9)] max-[600px]:right-4 max-[600px]:bottom-4 max-[600px]:tracking-[0.04em]'>
+    JASON & LUCIA · LEONIDA, USA
+  </span>
 </section>
