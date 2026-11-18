@@ -1,76 +1,63 @@
 ---
+import Icon from '@/components/Icon'
 import { asset } from '@/helpers/assets.helpers'
 
 import LocalCountdown from './LocalCountdown.astro'
 ---
 
-<section class='hero' aria-labelledby='hero-title'>
-  <div class='hero-art' aria-hidden='true'>
+<section class='hero relative isolate flex min-h-svh flex-col justify-end overflow-clip bg-[#211729]'>
+  <div class='absolute inset-0 -z-10 overflow-hidden' aria-hidden='true'>
     <img
       src={asset('hero')}
       alt=''
       width='1920'
       height='1080'
       fetchpriority='high'
-      class='hero-background'
+      decoding='async'
+      class='hero-background absolute h-full w-full object-cover object-[62%_center] max-[900px]:object-[65%_center] max-[600px]:object-[61%_center] min-[1600px]:object-center'
     />
-    <div class='hero-shade'></div>
+    <div class='absolute inset-0 bg-gradient-to-r from-canvas/75 via-canvas/30 to-transparent'></div>
+    <div class='absolute inset-0 bg-gradient-to-t from-canvas/80 via-canvas/20 to-transparent'></div>
+    <div class='absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-canvas/60 to-transparent'></div>
   </div>
-  <div class='hero-content wrap'>
-    <div class='hero-copy'>
-      <p class='eyebrow hero-eyebrow'>
-        <span class='tiny-star'>✦</span> EL MUNDO TIENE UNA CITA CON VICE CITY
+
+  <div class='wrap flex flex-1 flex-col justify-end pt-36 pb-0 max-[600px]:pt-28'>
+    <div class='hero-copy max-w-2xl'>
+      <p class='flex items-center gap-3 eyebrow text-peach'>
+        <span class='h-px w-8 bg-peach' aria-hidden='true'></span>
+        19 NOV 2026 · LANZAMIENTO MUNDIAL
       </p>
-      <img
-        class='hero-game-logo'
-        src={asset('fullLogo')}
-        width='160'
-        height='140'
-        alt='Grand Theft Auto VI'
-      />
       <h1
         id='hero-title'
-        class='text-8xl max-[1150px]:text-7xl max-[600px]:text-6xl max-[359px]:text-5xl min-[1600px]:text-9xl'
+        class='mt-6 text-8xl leading-[0.92] font-bold tracking-[-0.055em] max-[1150px]:text-7xl max-[600px]:text-5xl max-[600px]:leading-[0.98] max-[359px]:text-4xl min-[1600px]:text-7xl'
       >
-        La espera
-        <br />
-        <span>termina.</span>
+        Vice City abre
+        <br class='max-[600px]:hidden' />
+        <span class='text-vice'>a medianoche.</span>
       </h1>
-      <p class='hero-description'>
-        Una nueva era. Una medianoche a la vez.
-        <br />
-        Sigue la llegada de GTA VI, país por país.
+      <p class='mt-6 max-w-[440px] text-lg leading-7 text-ink/80 max-[600px]:text-base max-[600px]:leading-6'>
+        Elige tu país y sigue la hora local de referencia del 19 de noviembre.
       </p>
-      <a class='button button-primary' href='#mi-region'>
-        Ver mi país{' '}
-        <svg
-          viewBox='0 0 24 24'
-          width='20'
-          height='20'
-          fill='none'
-          stroke='currentColor'
-          stroke-width='1.6'
-          aria-hidden='true'
-        >
-          <circle cx='12' cy='12' r='8' />
-          <path d='M12 7v10M7 12h10' />
-        </svg>
-      </a>
-      <div class='platforms'>
-        <span>PLAYSTATION 5</span>
-        <span class='platform-separator'>/</span>
-        <span>XBOX SERIES X|S</span>
-      </div>
+      <p class='mt-5 text-xs leading-4 font-bold tracking-[0.12em] text-[#d9b7c9]'>
+        PLAYSTATION 5
+        <span class='mx-2 font-normal text-[#9b7f90]' aria-hidden='true'>
+          ·
+        </span>
+        XBOX SERIES X|S
+      </p>
     </div>
+
     <LocalCountdown />
-  </div>
-  <div class='hero-bottom wrap'>
-    <a href='#paises' class='scroll-cue'>
-      <span class='scroll-line' aria-hidden='true'></span> EL LANZAMIENTO, EN
-      TIEMPO REAL
-    </a>
-    <span class='hero-coordinates'>
-      VICE CITY, LEONIDA <span>25°46′ N 80°12′ W</span>
-    </span>
+
+    <div class='flex items-center justify-between gap-6 py-5 text-xs leading-4 text-[#c1b1c4] max-[600px]:py-4'>
+      <a
+        href='#paises'
+        class='inline-flex min-h-11 items-center gap-3 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
+      >
+        <span class='inline-block h-6 w-px bg-vice' aria-hidden='true'></span>
+        Ver los 40 países
+        <Icon name='arrow-down' class='size-4' />
+      </a>
+    </div>
   </div>
 </section>
