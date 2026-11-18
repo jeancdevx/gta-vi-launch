@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+test-results/
+playwright-report/
+.cache/
+.husky/_/
+.agents/
+skills-lock.json
