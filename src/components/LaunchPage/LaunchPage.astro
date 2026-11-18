@@ -1,0 +1,23 @@
+---
+import BaseLayout from '@/components/BaseLayout'
+import Hero from '@/components/Hero'
+import HowItWorks from '@/components/HowItWorks'
+import LaunchTracker from '@/components/LaunchTracker'
+import SiteFooter from '@/components/SiteFooter'
+import SiteHeader from '@/components/SiteHeader'
+import ViceMoment from '@/components/ViceMoment'
+---
+
+<BaseLayout>
+  <SiteHeader />
+  <main id='contenido'>
+    <Hero />
+    <LaunchTracker />
+    <ViceMoment />
+    <HowItWorks />
+  </main>
+  <SiteFooter />
+</BaseLayout>
+<script>
+  import './LaunchPage.animations'
+</script>
