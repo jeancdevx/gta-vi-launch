@@ -1,42 +1,72 @@
 ---
+import Icon from '@/components/Icon'
 import type { Region } from '@/constants'
-import { releaseInstant } from '@/helpers/release.helpers'
+import { releaseInstant, utcOffsetLabel } from '@/helpers/release.helpers'
 
 interface Props {
   region: Region
   index: number
 }
 
-const { region } = Astro.props
+const { region, index } = Astro.props
+const offset = utcOffsetLabel(region.zone)
 ---
 
 <article
-  class='country-card'
+  class='country-card group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line px-1 py-3 transition-colors duration-150 ease-out hover:bg-white/[0.03] data-[selected=true]:bg-vice/[0.06] md:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,1fr)_3rem] md:gap-x-6 md:gap-y-0'
   data-region={region.id}
   data-instant={releaseInstant(region.zone)}
   aria-labelledby={`country-${region.id}`}
 >
-  <div class='country-card-top'>
-    <span class='country-flag' aria-hidden='true'>
+  <div class='col-start-1 row-start-1 flex min-w-0 items-center gap-3 md:col-start-1'>
+    <span
+      class='w-6 shrink-0 text-[0.625rem] text-[#8f839b] tabular-nums group-data-[selected=true]:text-vice'
+      aria-hidden='true'
+    >
+      {String(index + 1).padStart(2, '0')}
+    </span>
+    <span class='text-xl leading-none' aria-hidden='true'>
       {region.flag}
     </span>
-    <span class='country-status'>Hora de referencia</span>
+    <div class='min-w-0'>
+      <h3
+        id={`country-${region.id}`}
+        class='truncate text-sm leading-5 font-semibold'
+      >
+        {region.country}
+      </h3>
+      <p class='truncate text-xs leading-4 text-muted'>
+        {region.city} · {region.continent}
+      </p>
+    </div>
   </div>
-  <h3 id={`country-${region.id}`}>{region.country}</h3>
-  <p class='country-city'>
-    {region.city} <span>· {region.continent}</span>
-  </p>
-  <p class='country-timer' role='timer'>
-    19 nov · 00:00 local
-  </p>
-  <div class='country-card-bottom'>
-    <span class='country-zone'>{region.zone}</span>
-    <button
-      type='button'
-      data-choose-region={region.id}
-      aria-label={`Ver contador de ${region.country}`}
+
+  <div class='col-start-1 row-start-2 flex items-center gap-2 text-xs leading-4 text-muted md:col-start-2 md:row-start-1'>
+    <span class='text-[#cfc4d7] tabular-nums'>00:00</span>
+    <span class='text-[#7f738c]' aria-hidden='true'>
+      ·
+    </span>
+    <span class='tabular-nums'>{offset}</span>
+  </div>
+
+  <div class='col-start-2 row-start-1 text-right md:col-start-3 md:text-left'>
+    <p
+      class='country-timer text-sm leading-5 font-semibold tracking-[-0.01em] whitespace-nowrap text-[#e9dfee] tabular-nums group-data-[available=true]:text-mint'
+      role='timer'
     >
-      Ver mi contador
-    </button>
+      19 nov · 00:00
+    </p>
+    <p class='country-status mt-0.5 text-[0.625rem] leading-3 tracking-[0.1em] text-vice uppercase group-data-[available=true]:text-mint'>
+      En espera
+    </p>
   </div>
+
+  <button
+    type='button'
+    data-choose-region={region.id}
+    aria-label={`Ver el contador de ${region.country}`}
+    class='col-start-2 row-start-2 grid size-11 place-items-center justify-self-end border border-white/15 text-muted transition-colors duration-150 ease-out hover:border-vice hover:text-vice focus-visible:outline-offset-2 md:col-start-4 md:row-start-1'
+  >
+    <Icon name='arrow-right' class='size-4' />
+  </button>
 </article>

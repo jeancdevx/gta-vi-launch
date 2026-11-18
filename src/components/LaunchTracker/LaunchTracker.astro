@@ -1,4 +1,6 @@
 ---
+import Button from '@/components/Button'
+import Icon from '@/components/Icon'
 import { alternateZones, regions, release } from '@/constants'
 import { releaseInstant } from '@/helpers/release.helpers'
 
@@ -12,84 +14,145 @@ const ordered = [...regions].sort(
 )
 ---
 
-<section class='tracker wrap' id='paises' aria-labelledby='tracker-title'>
-  <div class='section-top'>
+<section
+  class='tracker wrap pt-24 pb-24 max-[900px]:pt-20 max-[600px]:pt-16 max-[600px]:pb-16'
+  id='paises'
+  aria-labelledby='tracker-title'
+>
+  <div
+    class='flex items-end justify-between gap-12 max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-6'
+    data-reveal
+  >
     <div>
-      <p class='eyebrow accent'>TODOS MIRANDO EL MISMO RELOJ.</p>
-      <h2 id='tracker-title'>
-        El mundo está
+      <p class='eyebrow text-vice'>EL TABLERO</p>
+      <h2
+        id='tracker-title'
+        class='mt-6 max-w-[680px] text-5xl leading-[0.95] font-semibold tracking-[-0.04em] max-[600px]:mt-4 max-[600px]:text-4xl max-[600px]:leading-10'
+      >
+        Quién abre
         <br />
-        <span>entrando a Vice City.</span>
+        <span class='text-vice'>primero.</span>
       </h2>
     </div>
-    <p class='section-intro'>
-      De la primera medianoche a la última.
-      <br />
-      Así avanza el lanzamiento alrededor del mundo.
+    <p class='max-w-[360px] text-base leading-6 text-muted max-[900px]:max-w-[480px]'>
+      Cuarenta países ordenados por su medianoche local. Elige una fila para
+      llevar ese contador a la portada.
     </p>
-  </div>
-  <div class='world-overview'>
-    <div class='world-stat'>
-      <span class='stat-number' id='available-count'>
-        —
-      </span>
-      <span>
-        <span class='legend-dot available-dot'></span>Países disponibles
-      </span>
-    </div>
-    <div class='world-stat'>
-      <span class='stat-number muted' id='pending-count'>
-        —
-      </span>
-      <span>
-        <span class='legend-dot pending-dot'></span>Siguen esperando
-      </span>
-    </div>
-    <div class='world-stat progress-stat'>
-      <span class='stat-number' id='progress-number'>
-        —<small>%</small>
-      </span>
-      <span>Del listado ha llegado a medianoche</span>
-    </div>
-  </div>
-  <WorldMap />
-  <div class='map-footer'>
-    <p>
-      <span class='legend-dot available-dot'></span> Medianoche alcanzada{' '}
-      <span class='legend-dot pending-dot'></span> Por desbloquear
-    </p>
-    <span id='utc-clock'>HORA UTC · —</span>
   </div>
 
-  <div class='country-toolbar'>
+  <div
+    class='mt-12 grid gap-8 border-y border-line py-6 max-[600px]:mt-8 max-[600px]:gap-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:gap-12'
+    data-reveal
+  >
+    <div class='flex items-baseline gap-3'>
+      <span
+        class='text-6xl leading-none font-medium tracking-[-0.05em] text-mint tabular-nums max-[600px]:text-5xl'
+        id='available-count'
+      >
+        00
+      </span>
+      <span class='text-sm leading-5 text-muted'>
+        de {regions.length}
+        <span class='block text-xs text-[#9a90a6]'>ya disponibles</span>
+      </span>
+    </div>
+
+    <div class='min-w-0'>
+      <div class='flex items-baseline justify-between gap-4 text-xs leading-4'>
+        <span class='tracking-[0.14em] text-muted uppercase'>Progreso</span>
+        <span
+          class='text-2xl leading-none font-medium text-ink tabular-nums max-[600px]:text-xl'
+          id='progress-number'
+        >
+          0<small class='text-sm'>%</small>
+        </span>
+      </div>
+      <div
+        class='mt-3 h-px w-full bg-white/15'
+        role='progressbar'
+        aria-labelledby='tracker-title'
+        aria-valuemin='0'
+        aria-valuemax='100'
+        aria-valuenow='0'
+        id='progress-track'
+      >
+        <div
+          class='h-px w-0 bg-vice transition-[width] duration-700 ease-out'
+          id='progress-fill'
+        ></div>
+      </div>
+      <p class='mt-3 text-xs leading-4 text-muted'>
+        <span class='text-vice' id='pending-count'>
+          40
+        </span>{' '}
+        países todavía esperan la medianoche.
+      </p>
+    </div>
+
+    <div class='text-left md:text-right'>
+      <p class='eyebrow text-muted'>Ahora</p>
+      <p
+        class='mt-2 text-sm leading-5 tracking-[0.06em] text-ink tabular-nums'
+        id='utc-clock'
+      >
+        —:—:— UTC
+      </p>
+    </div>
+  </div>
+
+  <div class='mx-auto mt-10 max-w-7xl max-[600px]:mt-6'>
+    <WorldMap />
+  </div>
+
+  <div class='mt-8 flex items-center justify-between gap-6 max-[900px]:gap-4 max-[600px]:mt-6 max-[600px]:flex-col max-[600px]:items-stretch'>
     <div
-      class='filter-group'
+      class='flex gap-6 max-[600px]:justify-between max-[600px]:gap-2'
       role='group'
       aria-label='Filtrar por disponibilidad'
     >
-      <button type='button' data-filter='all' aria-pressed='true'>
-        Todos <span>{regions.length}</span>
+      <button
+        type='button'
+        data-filter='all'
+        aria-pressed='true'
+        class='min-h-11 border-b-2 border-transparent px-1 text-sm leading-5 font-medium whitespace-nowrap text-muted transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink max-[600px]:flex-1'
+      >
+        Todos
+        <span class='ml-1.5 text-xs tabular-nums opacity-60'>
+          {regions.length}
+        </span>
       </button>
-      <button type='button' data-filter='available' aria-pressed='false'>
-        Disponibles <span id='filter-available-count'>—</span>
+      <button
+        type='button'
+        data-filter='available'
+        aria-pressed='false'
+        class='min-h-11 border-b-2 border-transparent px-1 text-sm leading-5 font-medium whitespace-nowrap text-muted transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink max-[600px]:flex-1'
+      >
+        Disponibles
+        <span
+          class='ml-1.5 text-xs tabular-nums opacity-60'
+          id='filter-available-count'
+        >
+          0
+        </span>
       </button>
-      <button type='button' data-filter='pending' aria-pressed='false'>
-        En espera <span id='filter-pending-count'>—</span>
+      <button
+        type='button'
+        data-filter='pending'
+        aria-pressed='false'
+        class='min-h-11 border-b-2 border-transparent px-1 text-sm leading-5 font-medium whitespace-nowrap text-muted transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink max-[600px]:flex-1'
+      >
+        En espera
+        <span
+          class='ml-1.5 text-xs tabular-nums opacity-60'
+          id='filter-pending-count'
+        >
+          40
+        </span>
       </button>
     </div>
-    <label class='search-field'>
-      <svg
-        viewBox='0 0 24 24'
-        width='20'
-        height='20'
-        fill='none'
-        stroke='currentColor'
-        stroke-width='1.5'
-        aria-hidden='true'
-      >
-        <circle cx='10.5' cy='10.5' r='6.5' />
-        <path d='m15.5 15.5 5 5' />
-      </svg>
+
+    <label class='flex w-[280px] items-center gap-3 border-b border-white/25 py-2 text-muted transition-colors duration-150 ease-out focus-within:border-vice max-[900px]:w-[240px] max-[600px]:w-full'>
+      <Icon name='search' class='shrink-0' size={18} />
       <span class='sr-only'>Buscar país o ciudad</span>
       <input
         type='search'
@@ -97,46 +160,76 @@ const ordered = [...regions].sort(
         name='country'
         autocomplete='off'
         placeholder='Busca tu país…'
+        class='w-full min-w-0 border-0 bg-transparent p-0 text-base leading-6 text-ink outline-none placeholder:text-[#a79eb3] focus-visible:outline-none'
       />
     </label>
   </div>
-  <div class='results-meta'>
+
+  <div class='mt-6 flex items-center justify-between gap-4 text-xs leading-4 text-[#b3aabf] max-[600px]:mt-3'>
     <p id='results-count' role='status'>
       {regions.length} países en seguimiento
     </p>
-    <span>19 NOV · 00:00 LOCALES</span>
+    <p class='flex items-center gap-4 tracking-[0.08em] max-[600px]:hidden'>
+      <span>
+        <span class='mr-1.5 inline-block size-1.5 bg-mint align-middle'></span>
+        Disponible
+      </span>
+      <span>
+        <span class='mr-1.5 inline-block size-1.5 bg-vice align-middle'></span>
+        En espera
+      </span>
+    </p>
   </div>
-  <div
-    class='country-grid grid grid-cols-1 gap-4 max-[600px]:gap-3 min-[360px]:grid-cols-2 min-[901px]:grid-cols-3 min-[1151px]:grid-cols-4'
-    id='country-grid'
-  >
+
+  <div class='hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,1fr)_3rem] items-center gap-6 border-b border-line pt-5 pb-2 text-[0.625rem] font-semibold tracking-[0.18em] text-muted uppercase md:grid'>
+    <span>País · ciudad</span>
+    <span>Hora local</span>
+    <span>Cuenta regresiva</span>
+    <span class='sr-only'>Abrir contador</span>
+  </div>
+
+  <div id='country-grid'>
     {ordered.map((region, index) => (
       <CountryCard region={region} index={index} />
     ))}
   </div>
-  <div class='empty-state' id='empty-state' hidden>
-    <span class='empty-symbol' aria-hidden='true'>
-      ◎
-    </span>
-    <h3>No encontramos ese país.</h3>
-    <p>Prueba con el nombre de la ciudad o cambia el filtro.</p>
-    <button class='button button-secondary' id='clear-filters' type='button'>
+
+  <div
+    class='border-b border-line px-6 py-16 text-center max-[600px]:py-12'
+    id='empty-state'
+    hidden
+  >
+    <Icon name='crosshair' class='mx-auto text-vice' size={36} />
+    <h3 class='mt-5 text-2xl max-[600px]:text-xl'>No encontramos ese país.</h3>
+    <p class='mt-2 text-muted'>
+      Prueba con el nombre de la ciudad o cambia el filtro.
+    </p>
+    <Button variant='secondary' id='clear-filters' class='mt-6'>
       Ver todos los países
-    </button>
+    </Button>
   </div>
-  <p class='coverage-note'>
+
+  <p class='mt-8 max-w-[880px] text-sm leading-5 text-muted max-[600px]:mt-6 max-[600px]:text-xs max-[600px]:leading-4'>
     Seguimiento de {regions.length} países, con la ciudad de referencia
     indicada. Los estados se calculan según el horario publicado, sin conexión
-    con tu consola. <a href='#como-funciona'>Sobre las zonas horarias</a>
+    con tu consola.
+    <a
+      href='#como-funciona'
+      class='text-vice underline underline-offset-4 transition-colors duration-200 ease-out hover:text-peach'
+    >
+      Sobre las zonas horarias
+    </a>
   </p>
+
   <noscript>
-    <p class='noscript-notice'>
+    <p class='mt-6 border-y border-line py-5 text-peach'>
       Activa JavaScript para ver los contadores en tiempo real. La hora de
       referencia es el 19 de noviembre de 2026 a las 00:00 en la zona indicada
       en cada país.
     </p>
   </noscript>
 </section>
+
 <script
   id='release-data'
   type='application/json'

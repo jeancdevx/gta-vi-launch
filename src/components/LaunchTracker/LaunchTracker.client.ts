@@ -11,39 +11,60 @@ const config = JSON.parse(
   document.querySelector('#release-data')!.textContent!
 ) as Config
 const { regions, alternateZones } = config
-const byId = new Map(regions.map(r => [r.id, r]))
-const instants = new Map(regions.map(r => [r.id, releaseInstant(r.zone)]))
+const byId = new Map(regions.map(region => [region.id, region]))
+const instants = new Map(
+  regions.map(region => [region.id, releaseInstant(region.zone)])
+)
+
 const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!
-const select = $<HTMLSelectElement>('#region-select')
-const zoneSelect = $<HTMLSelectElement>('#zone-select')
-const search = $<HTMLInputElement>('#country-search')
-const filterButtons = [
-  ...document.querySelectorAll<HTMLButtonElement>('[data-filter]')
+const $$ = <T extends HTMLElement = HTMLElement>(selector: string) => [
+  ...document.querySelectorAll<T>(selector)
 ]
-const cards = [...document.querySelectorAll<HTMLElement>('[data-region]')].map(
-  element => ({
+
+const picker = $('[data-region-picker]')
+const trigger = $<HTMLButtonElement>('#region-trigger')
+const panel = $('#region-panel')
+const backdrop = $('#region-backdrop')
+const closeButton = $<HTMLButtonElement>('#region-close')
+const regionSearch = $<HTMLInputElement>('#region-search')
+const optionElements = $$('[data-region-option]')
+const optionById = new Map(optionElements.map(option => [option.id, option]))
+const optionKey = (regionId: string, zone: string) => `${regionId}::${zone}`
+const optionByKey = new Map(
+  optionElements.map(option => [
+    optionKey(option.dataset.regionOption!, option.dataset.optionZone!),
+    option
+  ])
+)
+const zoneWrap = $('#extra-zone-wrap')
+const zoneOptions = $('#zone-options')
+const search = $<HTMLInputElement>('#country-search')
+const filterButtons = $$<HTMLButtonElement>('[data-filter]')
+const cards = $$('[data-region]')
+  .filter(element => element.tagName !== 'LI')
+  .map(element => ({
     element,
     region: byId.get(element.dataset.region!)!,
     instant: instants.get(element.dataset.region!)!,
     status: element.querySelector<HTMLElement>('.country-status')!,
     timer: element.querySelector<HTMLElement>('.country-timer')!
-  })
-)
-const pins = [
-  ...document.querySelectorAll<HTMLButtonElement>('[data-map-region]')
-]
+  }))
+const mapPins = $$<HTMLButtonElement>('[data-map-region]')
 const url = new URL(location.href)
+const mobileQuery = matchMedia('(max-width: 600px)')
+
 let filter = ['all', 'available', 'pending'].includes(
   url.searchParams.get('status') ?? ''
 )
   ? url.searchParams.get('status')!
   : 'all'
-let activeRegion = regions.find(r => r.id === 'pe')!
+let activeRegion = byId.get('pe') ?? regions[0]!
 let activeZone = activeRegion.zone
 let selectedInstant = releaseInstant(activeZone)
 let selectedAvailable: boolean | undefined
 let lastAvailability = ''
+let activeOptionId = ''
 
 search.value = (url.searchParams.get('q') ?? '').slice(0, 120)
 
@@ -67,39 +88,115 @@ function updateUrl() {
 
   if (search.value.trim()) next.searchParams.set('q', search.value.trim())
   else next.searchParams.delete('q')
+
   history.replaceState(null, '', next)
 }
 
-function applyFilters(now = Date.now()) {
+function visibleOptions() {
+  return optionElements.filter(option => !option.hidden)
+}
+
+function scrollOptionIntoView(option: HTMLElement) {
+  const list = $('#region-listbox')
+  const listRect = list.getBoundingClientRect()
+  const optionRect = option.getBoundingClientRect()
+
+  if (optionRect.top < listRect.top || optionRect.bottom > listRect.bottom)
+    list.scrollTop +=
+      optionRect.top - listRect.top - (listRect.height - optionRect.height) / 2
+}
+
+function setActiveOption(option: HTMLElement | null, scroll = true) {
+  activeOptionId = option?.id ?? ''
+
+  if (option) regionSearch.setAttribute('aria-activedescendant', option.id)
+  else regionSearch.removeAttribute('aria-activedescendant')
+
+  for (const item of optionElements)
+    item.dataset.active = String(item === option)
+
+  if (option && scroll) scrollOptionIntoView(option)
+}
+
+function filterOptions(query: string) {
   let count = 0
 
-  for (const card of cards) {
-    const available = now >= card.instant
-    const visible =
-      (filter === 'all' || (filter === 'available' ? available : !available)) &&
-      matchesSearch(
-        search.value,
-        card.region.country,
-        card.region.city,
-        card.region.continent
-      )
+  for (const option of optionElements) {
+    const matches = matchesSearch(
+      query,
+      option.dataset.country ?? '',
+      option.dataset.city ?? '',
+      option.dataset.continent ?? ''
+    )
 
-    card.element.hidden = !visible
+    option.hidden = !matches
 
-    if (visible) count++
+    if (matches) count++
   }
 
-  $('#empty-state').hidden = count > 0
-  setText(
-    '#results-count',
-    `${count} ${count === 1 ? 'país' : 'países'} en seguimiento`
-  )
+  setText('#region-result-count', String(count))
+  $('#region-listbox').hidden = count === 0
+  $('#region-empty').hidden = count > 0
 
-  for (const button of filterButtons)
-    button.setAttribute(
-      'aria-pressed',
-      String(button.dataset.filter === filter)
-    )
+  if (count === 0) {
+    setActiveOption(null)
+
+    return
+  }
+
+  const current = activeOptionId ? optionById.get(activeOptionId) : undefined
+
+  if (!current || current.hidden) setActiveOption(visibleOptions()[0]!, false)
+}
+
+function openPicker() {
+  panel.hidden = false
+  panel.setAttribute('aria-modal', String(mobileQuery.matches))
+  backdrop.dataset.open = 'true'
+  trigger.setAttribute('aria-expanded', 'true')
+  regionSearch.setAttribute('aria-expanded', 'true')
+  regionSearch.value = ''
+  filterOptions('')
+
+  const selected = optionByKey.get(optionKey(activeRegion.id, activeZone))
+
+  setActiveOption(selected ?? visibleOptions()[0] ?? null, false)
+
+  if (selected) scrollOptionIntoView(selected)
+  regionSearch.focus({ preventScroll: true })
+
+  if (mobileQuery.matches) document.body.style.overflow = 'hidden'
+}
+
+function closePicker(returnFocus = true) {
+  panel.hidden = true
+  panel.removeAttribute('aria-modal')
+  backdrop.dataset.open = 'false'
+  trigger.setAttribute('aria-expanded', 'false')
+  regionSearch.setAttribute('aria-expanded', 'false')
+  regionSearch.removeAttribute('aria-activedescendant')
+  setActiveOption(null, false)
+  document.body.style.overflow = ''
+
+  if (returnFocus) trigger.focus({ preventScroll: true })
+}
+
+function renderZones(options: { city: string; zone: string }[]) {
+  zoneOptions.replaceChildren(
+    ...options.map(option => {
+      const button = document.createElement('button')
+
+      button.type = 'button'
+      button.dataset.zoneOption = option.zone
+      button.textContent = option.city
+      button.setAttribute('aria-pressed', String(option.zone === activeZone))
+      button.className =
+        'min-h-11 border border-white/20 px-3 text-xs leading-4 text-muted transition-colors duration-150 ease-out hover:border-white/40 hover:text-ink aria-pressed:border-vice aria-pressed:bg-vice/10 aria-pressed:text-vice'
+
+      return button
+    })
+  )
+  zoneWrap.hidden = options.length < 2
 }
 
 function chooseRegion(id: string, zone?: string, announce = false) {
@@ -114,26 +211,34 @@ function chooseRegion(id: string, zone?: string, announce = false) {
     : activeRegion.zone
   selectedInstant = releaseInstant(activeZone)
   selectedAvailable = undefined
-  select.value = activeRegion.id
-  zoneSelect.replaceChildren(
-    ...options.map(
-      item => new Option(item.city, item.zone, false, item.zone === activeZone)
-    )
-  )
-  $('#extra-zone-wrap').hidden = options.length < 2
 
-  for (const pin of pins)
+  const city = options.find(option => option.zone === activeZone)!.city
+
+  setText('#region-trigger-flag', activeRegion.flag)
+  setText('#region-trigger-country', activeRegion.country)
+  setText('#region-trigger-city', `${city} · ${activeRegion.continent}`)
+  trigger.setAttribute(
+    'aria-label',
+    `Región seleccionada: ${activeRegion.country}, ${city}. Abrir selector.`
+  )
+  renderZones(options)
+
+  for (const option of optionElements) {
+    const selected =
+      option.dataset.regionOption === activeRegion.id &&
+      option.dataset.optionZone === activeZone
+
+    option.setAttribute('aria-selected', String(selected))
+  }
+
+  for (const pin of mapPins)
     pin.setAttribute(
       'aria-pressed',
       String(pin.dataset.mapRegion === activeRegion.id)
     )
 
   for (const card of cards)
-    card.element.classList.toggle(
-      'is-selected',
-      card.region.id === activeRegion.id
-    )
-  const city = options.find(o => o.zone === activeZone)!.city
+    card.element.dataset.selected = String(card.region.id === activeRegion.id)
 
   setText('#local-release', `19 NOV 2026 · 00:00 · ${city}`)
 
@@ -191,7 +296,7 @@ function tick() {
         ? 'Tiempo desde el lanzamiento'
         : 'Tiempo hasta el lanzamiento'
     )
-    $('.local-countdown').classList.toggle('has-launched', state.available)
+    $('#mi-region').classList.toggle('has-launched', state.available)
   }
 
   let availableCount = 0
@@ -213,13 +318,15 @@ function tick() {
     card.timer.textContent = durationLabel(card.instant, now)
   }
 
-  for (const pin of pins)
+  for (const pin of mapPins)
     pin.dataset.available = String(now >= instants.get(pin.dataset.mapRegion!)!)
+
   setText('#available-count', String(availableCount).padStart(2, '0'))
   setText(
     '#pending-count',
     String(regions.length - availableCount).padStart(2, '0')
   )
+
   const percentage = String(Math.round((availableCount / regions.length) * 100))
   const progress = $('#progress-number')
 
@@ -229,16 +336,52 @@ function tick() {
     unit.textContent = '%'
     progress.replaceChildren(percentage, unit)
     progress.dataset.value = percentage
+    $('#progress-track').setAttribute('aria-valuenow', percentage)
+    const fill = document.querySelector<HTMLElement>('#progress-fill')
+
+    if (fill) fill.style.width = `${percentage}%`
   }
 
   setText('#filter-available-count', String(availableCount))
   setText('#filter-pending-count', String(regions.length - availableCount))
-  setText('#utc-clock', `HORA UTC · ${utcFormatter.format(now)}`)
+  setText('#utc-clock', `${utcFormatter.format(now)} UTC`)
 
   if (availability !== lastAvailability) {
     lastAvailability = availability
     applyFilters(now)
   }
+}
+
+function applyFilters(now = Date.now()) {
+  let count = 0
+
+  for (const card of cards) {
+    const available = now >= card.instant
+    const visible =
+      (filter === 'all' || (filter === 'available' ? available : !available)) &&
+      matchesSearch(
+        search.value,
+        card.region.country,
+        card.region.city,
+        card.region.continent
+      )
+
+    card.element.hidden = !visible
+
+    if (visible) count++
+  }
+
+  $('#empty-state').hidden = count > 0
+  setText(
+    '#results-count',
+    `${count} ${count === 1 ? 'país' : 'países'} en seguimiento`
+  )
+
+  for (const button of filterButtons)
+    button.setAttribute(
+      'aria-pressed',
+      String(button.dataset.filter === filter)
+    )
 }
 
 let initialId = activeRegion.id
@@ -253,9 +396,9 @@ try {
   } else {
     const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone
     const detected = regions.find(
-      r =>
-        r.zone === browserZone ||
-        alternateZones[r.id]?.some(z => z.zone === browserZone)
+      region =>
+        region.zone === browserZone ||
+        alternateZones[region.id]?.some(zone => zone.zone === browserZone)
     )
 
     if (detected) {
@@ -275,12 +418,121 @@ if (byId.has(url.searchParams.get('country') ?? '')) {
 chooseRegion(initialId, initialZone)
 applyFilters()
 
-select.addEventListener('change', () =>
-  chooseRegion(select.value, undefined, true)
-)
-zoneSelect.addEventListener('change', () =>
-  chooseRegion(activeRegion.id, zoneSelect.value, true)
-)
+trigger.addEventListener('click', () => {
+  if (panel.hidden) openPicker()
+  else closePicker()
+})
+trigger.addEventListener('keydown', event => {
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    openPicker()
+  }
+})
+closeButton.addEventListener('click', () => closePicker())
+backdrop.addEventListener('click', () => closePicker())
+
+regionSearch.addEventListener('input', () => filterOptions(regionSearch.value))
+regionSearch.addEventListener('keydown', event => {
+  const items = visibleOptions()
+
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    closePicker()
+
+    return
+  }
+
+  if (event.key === 'Tab') {
+    closePicker(false)
+
+    return
+  }
+
+  if (!items.length) return
+
+  const currentIndex = items.findIndex(item => item.id === activeOptionId)
+
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    const direction = event.key === 'ArrowDown' ? 1 : -1
+    const nextIndex =
+      currentIndex === -1
+        ? direction === 1
+          ? 0
+          : items.length - 1
+        : (currentIndex + direction + items.length) % items.length
+
+    setActiveOption(items[nextIndex]!)
+  } else if (event.key === 'Home') {
+    event.preventDefault()
+    setActiveOption(items[0]!)
+  } else if (event.key === 'End') {
+    event.preventDefault()
+    setActiveOption(items.at(-1)!)
+  } else if (event.key === 'Enter') {
+    event.preventDefault()
+    const option = items.find(item => item.id === activeOptionId) ?? items[0]
+
+    if (option?.dataset.regionOption) {
+      chooseRegion(option.dataset.regionOption, option.dataset.optionZone, true)
+      closePicker()
+    }
+  }
+})
+
+for (const option of optionElements) {
+  option.addEventListener('click', () => {
+    chooseRegion(option.dataset.regionOption!, option.dataset.optionZone, true)
+    closePicker()
+  })
+  option.addEventListener('pointerenter', () => setActiveOption(option, false))
+}
+
+zoneOptions.addEventListener('click', event => {
+  const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+    '[data-zone-option]'
+  )
+
+  if (button?.dataset.zoneOption)
+    chooseRegion(activeRegion.id, button.dataset.zoneOption, true)
+})
+
+panel.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    closePicker()
+
+    return
+  }
+
+  if (event.key !== 'Tab' || !mobileQuery.matches) return
+
+  const focusable = [
+    ...panel.querySelectorAll<HTMLElement>(
+      'button, input, [href], [tabindex]:not([tabindex="-1"])'
+    )
+  ].filter(element => !element.hidden)
+
+  if (!focusable.length) return
+
+  const first = focusable[0]!
+  const last = focusable.at(-1)!
+
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+})
+
+document.addEventListener('pointerdown', event => {
+  if (panel.hidden) return
+
+  if (!picker.contains(event.target as Node)) closePicker(false)
+})
+
 search.addEventListener('input', () => {
   applyFilters()
   updateUrl()
@@ -292,6 +544,7 @@ for (const button of filterButtons)
     applyFilters()
     updateUrl()
   })
+
 $('#clear-filters').addEventListener('click', () => {
   filter = 'all'
   search.value = ''
@@ -300,24 +553,24 @@ $('#clear-filters').addEventListener('click', () => {
   search.focus()
 })
 
-for (const button of document.querySelectorAll<HTMLButtonElement>(
-  '[data-choose-region], [data-map-region]'
-)) {
-  button.addEventListener('click', () => {
-    chooseRegion(
-      (button.dataset.chooseRegion ?? button.dataset.mapRegion)!,
-      undefined,
-      true
-    )
-    $('#mi-region').scrollIntoView({
-      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 'instant'
-        : 'smooth',
-      block: 'center'
-    })
-    select.focus({ preventScroll: true })
+function showRegion(id: string) {
+  chooseRegion(id, undefined, true)
+  closePicker(false)
+  $('#mi-region').scrollIntoView({
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+      ? 'instant'
+      : 'smooth',
+    block: 'center'
   })
+  trigger.focus({ preventScroll: true })
 }
+
+for (const button of $$<HTMLButtonElement>(
+  '[data-choose-region], [data-map-region]'
+))
+  button.addEventListener('click', () => {
+    showRegion(button.dataset.chooseRegion ?? button.dataset.mapRegion!)
+  })
 
 let interval: ReturnType<typeof setInterval> | undefined
 

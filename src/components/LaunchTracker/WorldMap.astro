@@ -24,33 +24,43 @@ const pins = regions.filter(r =>
 )
 ---
 
-<div class='world-map' aria-label='Mapa ilustrativo del avance del lanzamiento'>
-  <svg viewBox='0 0 1080 450' aria-hidden='true' class='dot-atlas'>
+<div
+  class='relative aspect-[1080/450] w-full'
+  role='group'
+  aria-label='Mapa ilustrativo del avance del lanzamiento'
+>
+  <svg
+    viewBox='0 0 1080 450'
+    aria-hidden='true'
+    class='block h-full w-full text-[#7d6c88] opacity-80'
+  >
     <g fill='currentColor'>
       {dots.map(dot => (
-        <circle cx={dot.x} cy={dot.y} r='1.8' />
+        <circle cx={dot.x} cy={dot.y} r='1.9' />
       ))}
     </g>
-    <g class='map-equator'>
-      <path d='M 0 255 H 1080' />
-      <path d='M 540 0 V 450' />
-    </g>
   </svg>
+
   {pins.map(region => (
     <button
       type='button'
-      class='map-pin'
+      class='group absolute grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center border-0 bg-transparent p-0 text-vice data-[available=true]:text-mint'
       data-map-region={region.id}
       aria-label={`Consultar ${region.country}, ${region.city}`}
       style={`left:${(region.lon + 180) / 3.6}%;top:${(85 - region.lat) / 1.5}%`}
     >
-      <span class='pin-dot'></span>
-      <span class='pin-label'>{region.country}</span>
+      <span class='size-1.5 rounded-full bg-current shadow-[0_0_0_5px_rgba(245,165,198,0.1)] group-aria-pressed:size-2.5 group-aria-pressed:shadow-[0_0_0_7px_rgba(245,165,198,0.2)] group-data-[available=true]:shadow-[0_0_0_5px_rgba(184,229,193,0.1)]'></span>
+      <span
+        class:list={[
+          'pointer-events-none absolute bottom-7 z-10 rounded-none border border-line bg-surface px-3 py-2 text-xs leading-4 whitespace-nowrap text-ink opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 group-focus-visible:opacity-100',
+          region.id === 'nz'
+            ? 'right-0 left-auto translate-x-0'
+            : 'left-1/2 -translate-x-1/2'
+        ]}
+        aria-hidden='true'
+      >
+        {region.country}
+      </span>
     </button>
   ))}
-  <div class='map-caption'>
-    <span>90° N</span>
-    <span>VICE CITY IS CALLING</span>
-    <span>180° E</span>
-  </div>
 </div>
