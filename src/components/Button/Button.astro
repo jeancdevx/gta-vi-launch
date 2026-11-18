@@ -1,0 +1,58 @@
+---
+interface Props {
+  href?: string
+  variant?: 'primary' | 'secondary' | 'light' | 'ghost'
+  size?: 'md' | 'sm'
+  type?: 'button' | 'submit' | 'reset'
+  class?: string
+  target?: string
+  rel?: string
+  id?: string
+  'aria-label'?: string
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  type = 'button',
+  class: className,
+  target,
+  rel,
+  id,
+  'aria-label': ariaLabel
+} = Astro.props
+
+const classes = [
+  'inline-flex items-center justify-center gap-3 border font-semibold leading-none transition-[background-color,border-color,color,transform] duration-200 ease-out focus-visible:outline-offset-4 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
+  size === 'md'
+    ? 'min-h-12 px-5 py-3 text-base'
+    : 'min-h-11 px-4 py-2.5 text-sm',
+  variant === 'primary' &&
+    'border-vice bg-vice text-[#29192b] hover:border-peach hover:bg-peach',
+  variant === 'secondary' &&
+    'border-white/30 bg-transparent text-ink hover:border-vice hover:bg-white/5',
+  variant === 'light' &&
+    'border-ink bg-ink text-canvas hover:border-vice hover:bg-vice',
+  variant === 'ghost' &&
+    'border-transparent bg-transparent text-vice hover:text-peach',
+  className
+]
+---
+
+{href ? (
+  <a
+    href={href}
+    target={target}
+    rel={rel}
+    id={id}
+    aria-label={ariaLabel}
+    class:list={classes}
+  >
+    <slot />
+  </a>
+) : (
+  <button type={type} id={id} aria-label={ariaLabel} class:list={classes}>
+    <slot />
+  </button>
+)}
