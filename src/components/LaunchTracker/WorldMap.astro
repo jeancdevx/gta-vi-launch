@@ -1,0 +1,56 @@
+---
+import { regions } from '@/constants'
+
+import { createAtlasDots } from './WorldMap.helpers'
+
+const dots = createAtlasDots()
+const pins = regions.filter(r =>
+  [
+    'nz',
+    'au',
+    'jp',
+    'sg',
+    'in',
+    'ae',
+    'za',
+    'es',
+    'gb',
+    'ar',
+    'br',
+    'pe',
+    'us',
+    'mx'
+  ].includes(r.id)
+)
+---
+
+<div class='world-map' aria-label='Mapa ilustrativo del avance del lanzamiento'>
+  <svg viewBox='0 0 1080 450' aria-hidden='true' class='dot-atlas'>
+    <g fill='currentColor'>
+      {dots.map(dot => (
+        <circle cx={dot.x} cy={dot.y} r='1.8' />
+      ))}
+    </g>
+    <g class='map-equator'>
+      <path d='M 0 255 H 1080' />
+      <path d='M 540 0 V 450' />
+    </g>
+  </svg>
+  {pins.map(region => (
+    <button
+      type='button'
+      class='map-pin'
+      data-map-region={region.id}
+      aria-label={`Consultar ${region.country}, ${region.city}`}
+      style={`left:${(region.lon + 180) / 3.6}%;top:${(85 - region.lat) / 1.5}%`}
+    >
+      <span class='pin-dot'></span>
+      <span class='pin-label'>{region.country}</span>
+    </button>
+  ))}
+  <div class='map-caption'>
+    <span>90° N</span>
+    <span>VICE CITY IS CALLING</span>
+    <span>180° E</span>
+  </div>
+</div>

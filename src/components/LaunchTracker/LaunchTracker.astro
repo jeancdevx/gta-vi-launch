@@ -1,0 +1,147 @@
+---
+import { alternateZones, regions, release } from '@/constants'
+import { releaseInstant } from '@/helpers/release.helpers'
+
+import CountryCard from './CountryCard.astro'
+import WorldMap from './WorldMap.astro'
+
+const ordered = [...regions].sort(
+  (a, b) =>
+    releaseInstant(a.zone) - releaseInstant(b.zone) ||
+    a.country.localeCompare(b.country, 'es')
+)
+---
+
+<section class='tracker wrap' id='paises' aria-labelledby='tracker-title'>
+  <div class='section-top'>
+    <div>
+      <p class='eyebrow accent'>TODOS MIRANDO EL MISMO RELOJ.</p>
+      <h2 id='tracker-title'>
+        El mundo está
+        <br />
+        <span>entrando a Vice City.</span>
+      </h2>
+    </div>
+    <p class='section-intro'>
+      De la primera medianoche a la última.
+      <br />
+      Así avanza el lanzamiento alrededor del mundo.
+    </p>
+  </div>
+  <div class='world-overview'>
+    <div class='world-stat'>
+      <span class='stat-number' id='available-count'>
+        —
+      </span>
+      <span>
+        <span class='legend-dot available-dot'></span>Países disponibles
+      </span>
+    </div>
+    <div class='world-stat'>
+      <span class='stat-number muted' id='pending-count'>
+        —
+      </span>
+      <span>
+        <span class='legend-dot pending-dot'></span>Siguen esperando
+      </span>
+    </div>
+    <div class='world-stat progress-stat'>
+      <span class='stat-number' id='progress-number'>
+        —<small>%</small>
+      </span>
+      <span>Del listado ha llegado a medianoche</span>
+    </div>
+  </div>
+  <WorldMap />
+  <div class='map-footer'>
+    <p>
+      <span class='legend-dot available-dot'></span> Medianoche alcanzada{' '}
+      <span class='legend-dot pending-dot'></span> Por desbloquear
+    </p>
+    <span id='utc-clock'>HORA UTC · —</span>
+  </div>
+
+  <div class='country-toolbar'>
+    <div
+      class='filter-group'
+      role='group'
+      aria-label='Filtrar por disponibilidad'
+    >
+      <button type='button' data-filter='all' aria-pressed='true'>
+        Todos <span>{regions.length}</span>
+      </button>
+      <button type='button' data-filter='available' aria-pressed='false'>
+        Disponibles <span id='filter-available-count'>—</span>
+      </button>
+      <button type='button' data-filter='pending' aria-pressed='false'>
+        En espera <span id='filter-pending-count'>—</span>
+      </button>
+    </div>
+    <label class='search-field'>
+      <svg
+        viewBox='0 0 24 24'
+        width='20'
+        height='20'
+        fill='none'
+        stroke='currentColor'
+        stroke-width='1.5'
+        aria-hidden='true'
+      >
+        <circle cx='10.5' cy='10.5' r='6.5' />
+        <path d='m15.5 15.5 5 5' />
+      </svg>
+      <span class='sr-only'>Buscar país o ciudad</span>
+      <input
+        type='search'
+        id='country-search'
+        name='country'
+        autocomplete='off'
+        placeholder='Busca tu país…'
+      />
+    </label>
+  </div>
+  <div class='results-meta'>
+    <p id='results-count' role='status'>
+      {regions.length} países en seguimiento
+    </p>
+    <span>19 NOV · 00:00 LOCALES</span>
+  </div>
+  <div
+    class='country-grid grid grid-cols-1 gap-4 max-[600px]:gap-3 min-[360px]:grid-cols-2 min-[901px]:grid-cols-3 min-[1151px]:grid-cols-4'
+    id='country-grid'
+  >
+    {ordered.map((region, index) => (
+      <CountryCard region={region} index={index} />
+    ))}
+  </div>
+  <div class='empty-state' id='empty-state' hidden>
+    <span class='empty-symbol' aria-hidden='true'>
+      ◎
+    </span>
+    <h3>No encontramos ese país.</h3>
+    <p>Prueba con el nombre de la ciudad o cambia el filtro.</p>
+    <button class='button button-secondary' id='clear-filters' type='button'>
+      Ver todos los países
+    </button>
+  </div>
+  <p class='coverage-note'>
+    Seguimiento de {regions.length} países, con la ciudad de referencia
+    indicada. Los estados se calculan según el horario publicado, sin conexión
+    con tu consola. <a href='#como-funciona'>Sobre las zonas horarias</a>
+  </p>
+  <noscript>
+    <p class='noscript-notice'>
+      Activa JavaScript para ver los contadores en tiempo real. La hora de
+      referencia es el 19 de noviembre de 2026 a las 00:00 en la zona indicada
+      en cada país.
+    </p>
+  </noscript>
+</section>
+<script
+  id='release-data'
+  type='application/json'
+  set:html={JSON.stringify({ regions, alternateZones, release })}
+/>
+<script>
+  import './LaunchTracker.client'
+</script>

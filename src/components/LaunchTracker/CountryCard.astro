@@ -1,0 +1,42 @@
+---
+import type { Region } from '@/constants'
+import { releaseInstant } from '@/helpers/release.helpers'
+
+interface Props {
+  region: Region
+  index: number
+}
+
+const { region } = Astro.props
+---
+
+<article
+  class='country-card'
+  data-region={region.id}
+  data-instant={releaseInstant(region.zone)}
+  aria-labelledby={`country-${region.id}`}
+>
+  <div class='country-card-top'>
+    <span class='country-flag' aria-hidden='true'>
+      {region.flag}
+    </span>
+    <span class='country-status'>Hora de referencia</span>
+  </div>
+  <h3 id={`country-${region.id}`}>{region.country}</h3>
+  <p class='country-city'>
+    {region.city} <span>· {region.continent}</span>
+  </p>
+  <p class='country-timer' role='timer'>
+    19 nov · 00:00 local
+  </p>
+  <div class='country-card-bottom'>
+    <span class='country-zone'>{region.zone}</span>
+    <button
+      type='button'
+      data-choose-region={region.id}
+      aria-label={`Ver contador de ${region.country}`}
+    >
+      Ver mi contador
+    </button>
+  </div>
+</article>
