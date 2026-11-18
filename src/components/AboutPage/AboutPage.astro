@@ -1,64 +1,103 @@
 ---
 import BaseLayout from '@/components/BaseLayout'
+import Button from '@/components/Button'
+import Icon from '@/components/Icon'
 import { release } from '@/constants'
 ---
 
-<BaseLayout title='Créditos y privacidad · GTA VI Launch'>
-  <main class='legal-page wrap' id='contenido'>
-    <a href='/' class='text-link'>
+<BaseLayout
+  title='Créditos y privacidad · GTA VI Launch'
+  description='Fuentes, atribución, privacidad y alcance del seguimiento de GTA VI Launch. Proyecto de fans sin afiliación con Rockstar Games.'
+>
+  <main
+    class='legal-page wrap max-w-[880px] pt-20 pb-24 max-[600px]:pt-8 max-[600px]:pb-16'
+    id='contenido'
+  >
+    <a
+      href='/'
+      class='inline-flex items-center gap-2 text-sm text-vice underline underline-offset-4 transition-colors duration-200 ease-out hover:text-peach focus-visible:outline-offset-4'
+    >
+      <Icon name='arrow-left' class='size-4' />
       Volver al lanzamiento
     </a>
-    <p class='eyebrow accent'>GTA VI LAUNCH</p>
-    <h1>
+    <p class='mt-16 eyebrow text-vice max-[600px]:mt-10'>GTA VI LAUNCH</p>
+    <h1 class='mt-6 text-5xl leading-none tracking-[-0.04em] max-[600px]:text-4xl max-[600px]:leading-10'>
       Hecho por fans.
       <br />
       Con las fuentes a la vista.
     </h1>
-    <h2>Horarios</h2>
-    <p>
+
+    <h2 class='mt-12 text-2xl leading-8 max-[600px]:mt-8'>Horarios</h2>
+    <p class='mt-4 leading-7 text-muted'>
       La fecha y la regla de medianoche local proceden del{' '}
-      <a href={release.source}>artículo de Rockstar Support</a>, consultado el{' '}
-      {release.verifiedAt}. Los instantes se calculan con zonas IANA y las
-      reglas de horario de verano de tu navegador. Cada país muestra una ciudad
-      de referencia; una tienda puede aplicar una única ventana a todo un país.
-      Confirma siempre el contador de la cuenta en la que compraste el juego.
+      <a
+        href={release.source}
+        target='_blank'
+        rel='noopener noreferrer'
+        class='text-vice underline'
+      >
+        artículo de Rockstar Support
+      </a>
+      , consultado el {release.verifiedAt}. Los instantes se calculan con zonas
+      IANA y las reglas de horario de verano de tu navegador. Cada país muestra
+      una ciudad de referencia; una tienda puede aplicar una única ventana a
+      todo un país. Confirma siempre el contador de la cuenta en la que
+      compraste el juego.
     </p>
-    <h2>Identidad visual y créditos</h2>
-    <p>
+
+    <h2 class='mt-12 text-2xl leading-8 max-[600px]:mt-8'>
+      Identidad visual y créditos
+    </h2>
+    <p class='mt-4 leading-7 text-muted'>
       Grand Theft Auto VI, sus logotipos, imágenes y tipografías son propiedad
       de sus respectivos titulares. Este es un proyecto de fans independiente,
       sin afiliación ni respaldo de Rockstar Games o Take Two Interactive. El
       arte se referencia desde la{' '}
-      <a href='https://www.rockstargames.com/VI/media'>
+      <a
+        href='https://www.rockstargames.com/VI/media'
+        target='_blank'
+        rel='noopener noreferrer'
+        class='text-vice underline'
+      >
         galería oficial de Rockstar
       </a>{' '}
       y el{' '}
-      <a href='https://github.com/midudev/landing-gta-vi'>
+      <a
+        href='https://github.com/midudev/landing-gta-vi'
+        target='_blank'
+        rel='noopener noreferrer'
+        class='text-vice underline'
+      >
         repositorio educativo de Midudev
       </a>
       . Consulta docs/IDENTIDAD-VISUAL.md en el proyecto para el inventario y la
       procedencia.
     </p>
-    <h2>Privacidad</h2>
-    <p>
+
+    <h2 class='mt-12 text-2xl leading-8 max-[600px]:mt-8'>Privacidad</h2>
+    <p class='mt-4 leading-7 text-muted'>
       Esta página no utiliza analítica ni solicita tu ubicación geográfica.
       Puede guardar el país y la zona que eliges en el almacenamiento local de
       tu navegador. Usa el botón de abajo para borrar esa preferencia. Si los
       assets aún no están descargados localmente, el navegador los solicita a
       GitHub o Rockstar, que reciben los datos habituales de una petición web.
     </p>
-    <button type='button' class='button button-secondary' id='forget-region'>
+    <Button variant='secondary' id='forget-region' class='mt-6'>
       Borrar mi región guardada
-    </button>
-    <p id='forget-feedback' role='status'></p>
-    <h2>Uso del seguimiento</h2>
-    <p>
+    </Button>
+    <p id='forget-feedback' role='status' class='mt-4 text-sm text-mint'></p>
+
+    <h2 class='mt-12 text-2xl leading-8 max-[600px]:mt-8'>
+      Uso del seguimiento
+    </h2>
+    <p class='mt-4 leading-7 text-muted'>
       Los contadores son informativos y dependen de la hora de tu dispositivo.
       No verifican el estado de servidores, licencias, cuentas o copias físicas.
       La cobertura es un listado seleccionado de países y zonas de referencia,
       no un catálogo de todas las tiendas del mundo.
     </p>
   </main>
+
   <script>
     document.querySelector('#forget-region')?.addEventListener('click', () => {
       const feedback = document.querySelector('#forget-feedback')
