@@ -1,17 +1,66 @@
 ---
-import { asset, hasLocalFonts } from '@/helpers/assets.helpers'
+import { release } from '@/constants'
+import { hasLocalFonts } from '@/helpers/assets.helpers'
 
 import '@/styles/global.css'
 
 interface Props {
   title?: string
   description?: string
+  image?: string
+  imageAlt?: string
+  type?: 'website' | 'article'
+  noindex?: boolean
 }
 
 const {
   title = 'GTA VI · El mundo entra a Vice City',
-  description = 'Sigue el lanzamiento de GTA VI país por país. Consulta la cuenta regresiva en tu región y dónde ya llegó la medianoche del 19 de noviembre de 2026.'
+  description = 'Sigue el lanzamiento de GTA VI país por país. Consulta la cuenta regresiva en tu región y dónde ya llegó la medianoche del 19 de noviembre de 2026.',
+  image = '/og/gta-vi-launch.jpg',
+  imageAlt = 'Jason y Lucia frente al skyline de Vice City',
+  type = 'website',
+  noindex = true
 } = Astro.props
+
+const site = Astro.site ?? new URL('https://gta-vi-launch-five.vercel.app/')
+const pathname = Astro.url.pathname
+const path =
+  pathname === '/' || pathname.endsWith('/') ? pathname : `${pathname}/`
+const canonical = new URL(path, site)
+const imageUrl = new URL(image, site)
+const robots = noindex
+  ? 'noindex, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+  : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${site.origin}/#website`,
+      url: site.href,
+      name: 'GTA VI Launch',
+      description,
+      inLanguage: 'es',
+      publisher: { '@type': 'Organization', name: 'GTA VI Launch' }
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical.href}#webpage`,
+      url: canonical.href,
+      name: title,
+      description,
+      isPartOf: { '@id': `${site.origin}/#website` },
+      inLanguage: 'es',
+      about: {
+        '@type': 'VideoGame',
+        name: 'Grand Theft Auto VI',
+        gamePlatform: [...release.platforms],
+        datePublished: release.date,
+        publisher: { '@type': 'Organization', name: 'Rockstar Games' }
+      }
+    }
+  ]
+}
 ---
 
 <!doctype html>
@@ -19,16 +68,39 @@ const {
   <head>
     <meta charset='UTF-8' />
     <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <meta name='color-scheme' content='dark' />
     <meta name='theme-color' content='#111019' />
     <meta name='description' content={description} />
-    <meta name='robots' content='noindex, follow' />
-    <meta property='og:type' content='website' />
+    <meta name='robots' content={robots} />
+    <meta name='author' content='GTA VI Launch' />
+    <meta name='application-name' content='GTA VI Launch' />
+    <meta name='format-detection' content='telephone=no' />
+    <link rel='canonical' href={canonical.href} />
+    <link rel='alternate' hreflang='es' href={canonical.href} />
+    <link rel='alternate' hreflang='x-default' href={canonical.href} />
+    <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+    <link rel='alternate icon' type='image/png' href='/icons/icon-192.png' />
+    <link rel='apple-touch-icon' href='/icons/apple-touch-icon.png' />
+    <link rel='manifest' href='/site.webmanifest' />
+
+    <meta property='og:type' content={type} />
+    <meta property='og:site_name' content='GTA VI Launch' />
     <meta property='og:locale' content='es_ES' />
     <meta property='og:title' content={title} />
     <meta property='og:description' content={description} />
-    <meta property='og:image' content={asset('hero')} />
+    <meta property='og:url' content={canonical.href} />
+    <meta property='og:image' content={imageUrl.href} />
+    <meta property='og:image:type' content='image/jpeg' />
+    <meta property='og:image:width' content='1200' />
+    <meta property='og:image:height' content='630' />
+    <meta property='og:image:alt' content={imageAlt} />
+
     <meta name='twitter:card' content='summary_large_image' />
-    <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+    <meta name='twitter:title' content={title} />
+    <meta name='twitter:description' content={description} />
+    <meta name='twitter:image' content={imageUrl.href} />
+    <meta name='twitter:image:alt' content={imageAlt} />
+
     <link
       rel='preconnect'
       href='https://raw.githubusercontent.com'
@@ -38,29 +110,35 @@ const {
     {hasLocalFonts && (
       <link
         rel='preload'
-        href='/fonts/gta-regular.font'
+        href='/fonts/gta-regular.woff'
         as='font'
+        type='font/woff'
         crossorigin
       />
     )}
     {hasLocalFonts && <style is:global>
       @font-face {
         font-family: 'GTA Art Deco';
-        src: url('/fonts/gta-regular.font');
+        src: url('/fonts/gta-regular.woff') format('woff');
         font-weight: 400 500;
         font-display: swap;
       }
       @font-face {
         font-family: 'GTA Art Deco';
-        src: url('/fonts/gta-bold.font');
+        src: url('/fonts/gta-bold.woff') format('woff');
         font-weight: 600 800;
         font-display: swap;
       }
     </style>}
+    <script type='application/ld+json' set:html={JSON.stringify(schema)} />
+    <slot name='head' />
     <title>{title}</title>
   </head>
   <body>
-    <a href='#contenido' class='skip-link'>
+    <a
+      href='#contenido'
+      class='fixed top-4 left-4 z-50 -translate-y-24 bg-vice px-4 py-3 text-sm font-semibold text-canvas transition-transform duration-200 ease-out focus:translate-y-0'
+    >
       Saltar al contenido
     </a>
     <slot />
