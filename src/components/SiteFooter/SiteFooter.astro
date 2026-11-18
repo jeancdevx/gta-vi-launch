@@ -1,0 +1,31 @@
+---
+import { release } from '@/constants'
+import { asset } from '@/helpers/assets.helpers'
+---
+
+<footer class='site-footer wrap'>
+  <div class='footer-brand'>
+    <img
+      src={asset('fullLogo')}
+      width='64'
+      height='64'
+      alt='Grand Theft Auto VI'
+    />
+    <div>
+      <strong>Nos vemos en Vice City.</strong>
+      <p>Un seguimiento hecho por fans, para fans.</p>
+    </div>
+  </div>
+  <div class='footer-bottom'>
+    <p>
+      Proyecto no oficial. GTA VI y sus assets pertenecen a Rockstar Games y
+      Take Two Interactive.
+    </p>
+    <div>
+      <a href='/acerca/'>Créditos y privacidad</a>
+      <a href={release.source} target='_blank' rel='noopener noreferrer'>
+        Fuente oficial
+      </a>
+    </div>
+  </div>
+</footer>
