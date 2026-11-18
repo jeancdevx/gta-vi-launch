@@ -1,0 +1,76 @@
+---
+import { release } from '@/constants'
+
+import { faqs } from './HowItWorks.constants'
+---
+
+<section
+  class='explainer wrap'
+  id='como-funciona'
+  aria-labelledby='explain-title'
+>
+  <div class='section-top'>
+    <div>
+      <p class='eyebrow accent'>SIN PERDERTE ENTRE HUSOS HORARIOS.</p>
+      <h2 id='explain-title'>
+        Tú elige el país.
+        <br />
+        <span>Nosotros contamos.</span>
+      </h2>
+    </div>
+    <a
+      href={release.source}
+      target='_blank'
+      rel='noopener noreferrer'
+      class='source-link'
+    >
+      Consultar horario de Rockstar
+    </a>
+  </div>
+  <div class='steps'>
+    <article>
+      <span class='step-icon' aria-hidden='true'>
+        ◎
+      </span>
+      <h3>Encuentra tu región</h3>
+      <p>
+        Elige el país y la ciudad que usarás como referencia. Puedes cambiarla
+        cuando quieras.
+      </p>
+    </article>
+    <article>
+      <span class='step-icon' aria-hidden='true'>
+        ◷
+      </span>
+      <h3>Sigue la cuenta regresiva</h3>
+      <p>
+        Horas, minutos y segundos hasta la medianoche local del 19 de noviembre
+        de 2026.
+      </p>
+    </article>
+    <article>
+      <span class='step-icon' aria-hidden='true'>
+        ✦
+      </span>
+      <h3>Ve quién ya llegó</h3>
+      <p>
+        Al alcanzar la hora, el contador cambia automáticamente al tiempo
+        transcurrido desde el lanzamiento.
+      </p>
+    </article>
+  </div>
+  <div class='faq'>
+    <h3>Antes de arrancar.</h3>
+    <div>
+      {faqs.map(([q, a]) => (
+        <details>
+          <summary>
+            {q}
+            <span aria-hidden='true'>+</span>
+          </summary>
+          <p>{a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
