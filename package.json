@@ -1,0 +1,44 @@
+{
+  "name": "gta-vi-launch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 0.0.0.0",
+    "build": "astro build",
+    "preview": "astro preview --host 0.0.0.0",
+    "check": "astro check",
+    "test": "node --experimental-strip-types --test src/helpers/*.test.ts",
+    "test:e2e": "pnpm build && playwright test",
+    "assets:sync": "node scripts/sync-assets.mjs",
+    "skills:install": "node scripts/install-skills.mjs",
+    "lint": "oxlint --deny-warnings .",
+    "lint:fix": "oxlint --fix --deny-warnings .",
+    "format": "pnpm lint:fix && oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "prepare": "husky",
+    "commitlint": "commitlint",
+    "lint:staged": "lint-staged",
+    "verify": "pnpm lint && pnpm format:check && pnpm check && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "4.3.5",
+    "astro": "7.4.4",
+    "gsap": "3.15.1",
+    "tailwindcss": "4.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@astrojs/compiler-rs": "0.5.2",
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "@playwright/test": "1.64.1",
+    "@stylistic/eslint-plugin": "6.0.1",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.1",
+    "oxfmt": "0.79.0",
+    "oxlint": "1.94.0",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
