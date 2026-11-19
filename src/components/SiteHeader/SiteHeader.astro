@@ -2,31 +2,28 @@
 import { asset } from '@/helpers/assets.helpers'
 ---
 
-<header class='absolute top-0 left-1/2 z-30 flex w-[calc(100%-6rem)] max-w-[1280px] -translate-x-1/2 items-center justify-between gap-6 py-6 max-[900px]:w-[calc(100%-3rem)] max-[900px]:py-5 max-[600px]:w-[calc(100%-2rem)]'>
+<header class='absolute top-0 left-1/2 z-30 flex w-[calc(100%-6rem)] max-w-[1280px] -translate-x-1/2 items-center justify-between gap-4 py-6 max-[900px]:w-[calc(100%-3rem)] max-[900px]:py-5 max-[600px]:w-[calc(100%-2rem)]'>
   <a
     href='/'
-    class='inline-flex items-center gap-3 focus-visible:outline-offset-4'
+    class='inline-flex shrink-0 items-center gap-3 focus-visible:outline-offset-4'
     aria-label='GTA VI Launch, inicio'
   >
     <img
-      src={asset('fullLogo')}
-      width='116'
-      height='116'
+      src={asset('vi')}
+      width='46'
+      height='35'
       alt=''
-      class='h-11 w-11 object-contain max-[600px]:h-9 max-[600px]:w-9'
+      class='h-8 w-auto invert max-[600px]:h-7'
     />
-    <span class='text-sm leading-4 font-bold tracking-[0.22em] uppercase'>
-      GTA VI
-      <span class='mt-1 block text-[0.625rem] font-normal tracking-[0.18em] text-[#d8c9d9]'>
-        Launch tracker
-      </span>
+    <span class='text-[0.6875rem] leading-4 font-semibold tracking-[0.18em] text-[#e6d8e8] uppercase'>
+      Launch radar
     </span>
   </a>
 
-  <div class='flex items-center gap-8 max-[600px]:gap-4'>
+  <div class='flex items-center gap-6 max-[900px]:gap-3'>
     <nav
       aria-label='Navegación principal'
-      class='flex gap-7 text-sm leading-5 max-[900px]:hidden'
+      class='flex gap-6 text-sm leading-5 max-[760px]:hidden'
     >
       <a
         href='#paises'
@@ -35,15 +32,28 @@ import { asset } from '@/helpers/assets.helpers'
         Tablero
       </a>
       <a
+        href='#radar-streamers'
+        class='py-2 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
+      >
+        Creadores
+      </a>
+      <a
+        href='#hitos'
+        class='py-2 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
+      >
+        Hitos
+      </a>
+      <a
         href='#como-funciona'
         class='py-2 transition-colors duration-200 ease-out hover:text-vice focus-visible:outline-offset-4'
       >
         Cómo funciona
       </a>
     </nav>
+
     <a
       href='#mi-region'
-      class='relative inline-flex items-center gap-2 py-2 text-sm leading-5 font-semibold text-vice transition-colors duration-200 ease-out after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-peach after:transition-[width] after:duration-200 after:ease-out hover:text-peach hover:after:w-full focus-visible:outline-offset-4 focus-visible:after:w-full'
+      class='relative inline-flex shrink-0 items-center gap-1.5 py-2 text-sm leading-5 font-semibold text-vice transition-colors duration-200 ease-out after:absolute after:right-0 after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-peach after:transition-[width] after:duration-200 after:ease-out hover:text-peach hover:after:w-full focus-visible:outline-offset-4 focus-visible:after:w-full max-[420px]:text-xs'
     >
       Mi región
       <span aria-hidden='true'>↓</span>
