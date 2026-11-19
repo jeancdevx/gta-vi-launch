@@ -8,15 +8,15 @@ import RegionPicker from '@/components/RegionPicker'
   id='mi-region'
   aria-labelledby='region-heading'
 >
-  <div class='grid border-t border-white/25 max-[900px]:border-white/20 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1.1fr)_minmax(0,0.95fr)]'>
-    <div class='py-5 md:pr-8'>
+  <div class='grid grid-cols-1 border-t border-white/25 max-[900px]:border-white/20 md:grid-cols-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(0,0.9fr)]'>
+    <div class='min-w-0 py-5 md:pr-8'>
       <p class='eyebrow text-peach' id='region-heading'>
         Tu región
       </p>
       <RegionPicker />
     </div>
 
-    <div class='border-t border-white/15 py-5 max-[900px]:border-white/15 md:border-t-0 md:border-l md:px-8'>
+    <div class='min-w-0 border-t border-white/15 py-5 md:border-t-0 md:border-l md:pl-8 lg:px-8'>
       <div class='flex items-center justify-between gap-4'>
         <span
           class='eyebrow text-muted transition-colors duration-300 ease-out group-[.has-launched]:text-mint'
@@ -33,11 +33,11 @@ import RegionPicker from '@/components/RegionPicker'
       >
         <span
           id='clock-days-wrap'
-          class='inline-flex items-baseline gap-x-1.5'
+          class='inline-flex items-baseline gap-x-1'
           hidden
         >
           <span
-            class='text-[clamp(2.5rem,5.2vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
+            class='text-[clamp(1.875rem,4.4vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
             id='clock-days'
           >
             00
@@ -45,21 +45,21 @@ import RegionPicker from '@/components/RegionPicker'
           <span class='text-sm leading-none text-muted'>d</span>
         </span>
         <span
-          class='text-[clamp(2.5rem,5.2vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
+          class='text-[clamp(1.875rem,4.4vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
           id='clock-hours'
         >
           ··
         </span>
         <span class='text-sm leading-none text-muted'>h</span>
         <span
-          class='text-[clamp(2.5rem,5.2vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
+          class='text-[clamp(1.875rem,4.4vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
           id='clock-minutes'
         >
           ··
         </span>
         <span class='text-sm leading-none text-muted'>m</span>
         <span
-          class='text-[clamp(2.5rem,5.2vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
+          class='text-[clamp(1.875rem,4.4vw,3.5rem)] leading-none font-bold tracking-[-0.05em]'
           id='clock-seconds'
         >
           ··
@@ -71,7 +71,7 @@ import RegionPicker from '@/components/RegionPicker'
       </p>
     </div>
 
-    <div class='border-t border-white/15 py-5 max-[900px]:border-white/15 md:border-t-0 md:border-l md:pl-8'>
+    <div class='min-w-0 border-t border-white/15 py-5 md:col-span-2 lg:col-span-1 lg:border-t-0 lg:border-l lg:pl-8'>
       <p class='eyebrow text-muted'>Hora de referencia</p>
       <p
         id='local-release'
