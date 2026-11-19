@@ -130,6 +130,24 @@ export function createStreamerRadar(
         : `Ningún canal de ${region.country} está en GTA VI ahora`
   }
 
+  function appendExternalIcon(link: HTMLAnchorElement) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+
+    svg.setAttribute('viewBox', '0 0 24 24')
+    svg.setAttribute('width', '13')
+    svg.setAttribute('height', '13')
+    svg.setAttribute('fill', 'none')
+    svg.setAttribute('stroke', 'currentColor')
+    svg.setAttribute('stroke-width', '1.5')
+    svg.setAttribute('stroke-linecap', 'round')
+    svg.setAttribute('stroke-linejoin', 'round')
+    svg.setAttribute('aria-hidden', 'true')
+    svg.setAttribute('class', 'shrink-0')
+    svg.innerHTML =
+      "<path d='M14 4h6v6M20 4l-9 9'/><path d='M10 5H5v14h14v-5'/>"
+    link.append(svg)
+  }
+
   function buildCreatorRow(creator: StreamerProfile, index: number) {
     const status = getStatus(creator)
     const isLive = Boolean(status?.live)
@@ -203,7 +221,8 @@ export function createStreamerRadar(
       : isLive
         ? 'inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/20 px-3 text-xs leading-4 font-semibold text-ink transition-[border-color,color,transform] duration-150 ease-out hover:border-vice hover:text-vice active:scale-[0.97]'
         : 'inline-flex min-h-10 shrink-0 items-center gap-1.5 px-1 text-xs leading-4 font-semibold text-muted transition-colors duration-150 ease-out hover:text-vice'
-    link.textContent = isLive ? 'Ver directo ↗' : 'Abrir canal ↗'
+    link.textContent = isLive ? 'Ver directo' : 'Abrir canal'
+    appendExternalIcon(link)
 
     if (!showStatus) {
       article.append(left, link)
@@ -231,8 +250,8 @@ export function createStreamerRadar(
       badge.textContent = `En vivo · ${status?.gameName || 'Otro juego'}`
     } else {
       badge.className =
-        'inline-flex items-center border border-white/15 px-2 py-0.5 text-[0.625rem] leading-4 font-semibold tracking-[0.1em] text-muted uppercase'
-      badge.textContent = 'Desconectado'
+        'inline-flex items-center text-[0.625rem] leading-4 font-semibold tracking-[0.1em] text-[#8f839b] uppercase'
+      badge.textContent = 'Sin directo'
     }
 
     statusLine.append(badge)
@@ -266,18 +285,21 @@ export function createStreamerRadar(
 
     detail.className = 'mt-1.5 truncate text-xs leading-4 text-muted'
 
-    if (masked) {
-      detail.textContent =
-        'Título protegido · Escudo sin spoilers activo para evitar destripes.'
-      detail.className = 'mt-1.5 text-xs leading-4 text-mint/85'
-    } else if (isLive) {
-      detail.textContent = status?.title ?? 'Directo en curso'
-      detail.className = 'mt-1.5 truncate text-xs leading-4 text-ink/85'
+    if (isLive) {
+      if (masked) {
+        detail.textContent =
+          'Título protegido · Escudo sin spoilers activo para evitar destripes.'
+        detail.className = 'mt-1.5 text-xs leading-4 text-mint/85'
+      } else {
+        detail.textContent = status?.title ?? 'Directo en curso'
+        detail.className = 'mt-1.5 truncate text-xs leading-4 text-ink/85'
+      }
+
+      center.append(statusLine, detail)
     } else {
-      detail.textContent = 'Sin transmisión activa en este momento.'
+      center.append(statusLine)
     }
 
-    center.append(statusLine, detail)
     article.append(left, center, link)
 
     return article
@@ -372,7 +394,7 @@ export function createStreamerRadar(
 
         foot.className =
           'mt-2.5 text-[0.625rem] leading-3 tracking-[0.12em] text-vice uppercase'
-        foot.textContent = `${region.country} · ${creator.platform} ↗`
+        foot.textContent = `${region.country} · ${creator.platform}`
 
         card.append(top, title, foot)
 
