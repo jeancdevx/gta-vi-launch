@@ -4,7 +4,7 @@ import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 
-import { GET as getStreamers } from './api/streamers.ts'
+import { GET as getStreamers } from './server/streamers.ts'
 
 const ENV_KEYS = new Set([
   'TWITCH_CLIENT_ID',
