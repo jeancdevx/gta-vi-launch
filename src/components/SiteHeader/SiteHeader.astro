@@ -6,24 +6,27 @@ import { asset } from '@/helpers/assets.helpers'
   <a
     href='/'
     class='inline-flex shrink-0 items-center gap-3 focus-visible:outline-offset-4'
-    aria-label='GTA VI Launch, inicio'
+    aria-label='GTA VI Launch tracker, inicio'
   >
     <img
-      src={asset('vi')}
-      width='46'
-      height='35'
+      src={asset('fullLogo')}
+      width='116'
+      height='116'
       alt=''
-      class='h-8 w-auto invert max-[600px]:h-7'
+      class='h-11 w-11 object-contain max-[600px]:h-9 max-[600px]:w-9'
     />
-    <span class='text-[0.6875rem] leading-4 font-semibold tracking-[0.18em] text-[#e6d8e8] uppercase'>
-      Launch radar
+    <span class='text-sm leading-4 font-bold tracking-[0.22em] uppercase max-[360px]:text-xs'>
+      GTA VI
+      <span class='mt-1 block text-[0.625rem] font-normal tracking-[0.18em] text-[#d8c9d9]'>
+        Launch tracker
+      </span>
     </span>
   </a>
 
-  <div class='flex items-center gap-6 max-[900px]:gap-3'>
+  <div class='flex items-center gap-7 max-[900px]:gap-3'>
     <nav
       aria-label='Navegación principal'
-      class='flex gap-6 text-sm leading-5 max-[760px]:hidden'
+      class='flex gap-6 text-sm leading-5 max-[900px]:hidden'
     >
       <a
         href='#paises'
