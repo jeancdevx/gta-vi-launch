@@ -159,16 +159,16 @@ export function createStreamerRadar(
     const article = document.createElement('article')
 
     article.className =
-      'grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-1 py-3 transition-colors duration-150 ease-out hover:bg-white/[0.02]' +
+      'grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-1 py-3 transition-colors duration-150 ease-out hover:bg-white/[0.02]' +
       (showStatus
-        ? ' md:grid-cols-[minmax(0,1.35fr)_minmax(0,1.55fr)_auto] md:gap-6'
+        ? ' md:grid-cols-[minmax(0,1.35fr)_minmax(0,1.55fr)_auto] md:gap-x-6 md:gap-y-0'
         : '')
     article.dataset.streamerId = creator.id
     article.dataset.playingGtavi = String(isGtaVi)
 
     const left = document.createElement('div')
 
-    left.className = 'flex min-w-0 items-center gap-3'
+    left.className = 'col-start-1 row-start-1 flex min-w-0 items-center gap-3'
 
     const rank = document.createElement('span')
 
@@ -216,11 +216,13 @@ export function createStreamerRadar(
       'aria-label',
       `${isLive ? 'Ver directo de' : 'Abrir canal de'} ${creator.name} en ${creator.platform}`
     )
-    link.className = isGtaVi
-      ? 'inline-flex min-h-10 shrink-0 items-center gap-2 border border-vice bg-vice/12 px-3 text-xs leading-4 font-semibold text-vice transition-[border-color,color,background-color,transform] duration-150 ease-out hover:border-peach hover:text-peach active:scale-[0.97]'
-      : isLive
-        ? 'inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/20 px-3 text-xs leading-4 font-semibold text-ink transition-[border-color,color,transform] duration-150 ease-out hover:border-vice hover:text-vice active:scale-[0.97]'
-        : 'inline-flex min-h-10 shrink-0 items-center gap-1.5 px-1 text-xs leading-4 font-semibold text-muted transition-colors duration-150 ease-out hover:text-vice'
+    link.className =
+      'col-start-2 row-start-1 justify-self-end md:col-start-3 ' +
+      (isGtaVi
+        ? 'inline-flex min-h-10 shrink-0 items-center gap-2 border border-vice bg-vice/12 px-3 text-xs leading-4 font-semibold text-vice transition-[border-color,color,background-color,transform] duration-150 ease-out hover:border-peach hover:text-peach active:scale-[0.97]'
+        : isLive
+          ? 'inline-flex min-h-10 shrink-0 items-center gap-2 border border-white/20 px-3 text-xs leading-4 font-semibold text-ink transition-[border-color,color,transform] duration-150 ease-out hover:border-vice hover:text-vice active:scale-[0.97]'
+          : 'inline-flex min-h-10 shrink-0 items-center gap-1.5 px-1 text-xs leading-4 font-semibold text-muted transition-colors duration-150 ease-out hover:text-vice')
     link.textContent = isLive ? 'Ver directo' : 'Abrir canal'
     appendExternalIcon(link)
 
@@ -232,7 +234,8 @@ export function createStreamerRadar(
 
     const center = document.createElement('div')
 
-    center.className = 'col-span-2 min-w-0 md:col-span-1'
+    center.className =
+      'col-span-2 row-start-2 min-w-0 pl-9 md:col-span-1 md:col-start-2 md:row-start-1 md:pl-0'
 
     const statusLine = document.createElement('div')
 
@@ -361,15 +364,16 @@ export function createStreamerRadar(
         card.target = '_blank'
         card.rel = 'noopener noreferrer'
         card.className =
-          'group flex flex-col justify-between border border-line bg-surface px-4 py-3.5 transition-[border-color,background-color] duration-150 ease-out hover:border-vice/60 hover:bg-surface-raised'
+          'group flex min-w-0 w-full flex-col justify-between overflow-hidden border border-line bg-surface px-4 py-3.5 transition-[border-color,background-color] duration-150 ease-out hover:border-vice/60 hover:bg-surface-raised'
 
         const top = document.createElement('div')
 
-        top.className = 'flex items-center justify-between gap-2'
+        top.className = 'flex min-w-0 items-center justify-between gap-2'
 
         const who = document.createElement('span')
 
-        who.className = 'truncate text-sm leading-5 font-semibold text-ink'
+        who.className =
+          'min-w-0 truncate text-sm leading-5 font-semibold text-ink'
         who.textContent = `${region.flag} ${creator.name}`
 
         const viewers = document.createElement('span')
@@ -385,7 +389,7 @@ export function createStreamerRadar(
 
         const title = document.createElement('p')
 
-        title.className = 'mt-2 truncate text-xs leading-4 text-muted'
+        title.className = 'mt-2 min-w-0 truncate text-xs leading-4 text-muted'
         title.textContent = masked
           ? 'Título protegido · Escudo sin spoilers activo'
           : (status.title ?? 'Grand Theft Auto VI')
@@ -393,7 +397,7 @@ export function createStreamerRadar(
         const foot = document.createElement('p')
 
         foot.className =
-          'mt-2.5 text-[0.625rem] leading-3 tracking-[0.12em] text-vice uppercase'
+          'mt-2.5 truncate text-[0.625rem] leading-3 tracking-[0.12em] text-vice uppercase'
         foot.textContent = `${region.country} · ${creator.platform}`
 
         card.append(top, title, foot)
