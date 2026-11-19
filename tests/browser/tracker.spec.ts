@@ -258,3 +258,95 @@ test('streamer radar displays live GTA VI status and spoiler shield masks story 
   await expect(page.locator('#radar-list article')).toHaveCount(1)
   await expect(page.locator('#radar-list')).toContainText('Rubius')
 })
+
+test('region picker never collides with header and live global pulse never overflows mobile', async ({
+  page
+}) => {
+  await page.route('**/api/streamers', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        mode: 'live',
+        configured: true,
+        updatedAt: '2026-11-19T15:00:00Z',
+        providers: { twitch: true, youtube: true, kick: true },
+        live: {
+          'youtube:ishowspeed': {
+            live: true,
+            playingGtaVi: true,
+            gameName: 'Grand Theft Auto VI',
+            title:
+              'PLAYING GTA 6 RIGHT NOW WITH SUPERLONGUNBROKENTITLETEST1234567890',
+            viewers: 201500,
+            risk: 'unknown'
+          },
+          'youtube:vegetta777': {
+            live: true,
+            playingGtaVi: true,
+            gameName: 'Grand Theft Auto VI',
+            title: 'GTA 6 en Vice City #2',
+            viewers: 33100,
+            risk: 'story'
+          }
+        }
+      })
+    })
+  )
+
+  await page.goto('/?country=es')
+  await expect(page.locator('header img')).toHaveAttribute(
+    'src',
+    /full-logo\.webp$/
+  )
+  await expect(page.locator('header')).toContainText('Launch tracker')
+
+  for (const [width, height] of [
+    [320, 740],
+    [390, 844],
+    [768, 1024],
+    [1024, 768],
+    [1440, 820]
+  ]) {
+    await page.setViewportSize({ width, height })
+    await expect(page.locator('#radar-global-wrap')).toBeVisible()
+
+    const normalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    )
+
+    expect(normalOverflow, `Normal overflow at ${width}x${height}`).toBe(false)
+
+    await page.locator('#region-trigger').click()
+    await expect(page.locator('#region-panel')).toBeVisible()
+
+    const geometry = await page.evaluate(() => {
+      const header = document.querySelector('header')!.getBoundingClientRect()
+      const panel = document
+        .querySelector('#region-panel')!
+        .getBoundingClientRect()
+
+      return {
+        overflow: document.documentElement.scrollWidth > window.innerWidth,
+        panelTop: panel.top,
+        panelBottom: panel.bottom,
+        headerBottom: header.bottom,
+        viewportHeight: window.innerHeight
+      }
+    })
+
+    expect(geometry.overflow, `Picker overflow at ${width}x${height}`).toBe(
+      false
+    )
+
+    if (width >= 640) {
+      expect(
+        geometry.panelTop,
+        `Picker overlaps header at ${width}x${height}`
+      ).toBeGreaterThanOrEqual(geometry.headerBottom)
+    }
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator('#region-panel')).toBeHidden()
+  }
+})
