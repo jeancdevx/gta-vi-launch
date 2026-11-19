@@ -184,5 +184,99 @@
     #region-panel:not([hidden]) {
       animation: none;
     }
+
+    .map-signal-arc,
+    .map-blip-ring {
+      animation: none !important;
+    }
+
+    .map-stage {
+      transition: none !important;
+    }
+  }
+
+  .map-stage {
+    transition: transform 320ms var(--ease-out-custom);
+    will-change: transform;
+  }
+
+  .map-country {
+    fill: #2b2340;
+    stroke: rgba(245, 165, 198, 0.34);
+    stroke-width: 0.65;
+    transition:
+      fill 200ms var(--ease-out-custom),
+      stroke 200ms var(--ease-out-custom);
+  }
+
+  .map-country[data-available='true'] {
+    fill: rgba(184, 229, 193, 0.16);
+    stroke: rgba(184, 229, 193, 0.5);
+  }
+
+  .map-country[data-live='true'] {
+    fill: rgba(245, 165, 198, 0.22);
+    stroke: rgba(245, 165, 198, 0.72);
+  }
+
+  .map-country[data-selected='true'] {
+    fill: rgba(245, 165, 198, 0.3);
+    stroke: var(--pink);
+    stroke-width: 1.25;
+  }
+
+  .map-signal-arc {
+    stroke-dasharray: 6 6;
+    animation: radar-arc-flow 1.8s linear infinite;
+  }
+
+  .map-blip[aria-pressed='true'] .map-blip-ring,
+  .map-blip[data-live='true'] .map-blip-ring {
+    animation: radar-pulse 2.4s var(--ease-out-custom) infinite;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .map-blip:hover .map-blip-core {
+      transform: rotate(45deg) scale(1.35);
+    }
+  }
+
+  :root[data-spoiler-shield='true'] [data-spoiler-sensitive='true'] {
+    filter: blur(5px);
+    user-select: none;
+    transition: filter 200ms var(--ease-out-custom);
+  }
+
+  :root[data-spoiler-shield='true'] [data-spoiler-sensitive='true']:hover,
+  :root[data-spoiler-shield='true']
+    [data-spoiler-sensitive='true']:focus-visible {
+    filter: blur(0);
+  }
+
+  @keyframes radar-pulse {
+    0% {
+      transform: scale(0.75);
+      opacity: 0.85;
+    }
+
+    70% {
+      transform: scale(1.65);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1.65);
+      opacity: 0;
+    }
+  }
+
+  @keyframes radar-arc-flow {
+    from {
+      stroke-dashoffset: 24;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
   }
 }
