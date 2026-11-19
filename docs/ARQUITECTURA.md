@@ -19,13 +19,20 @@ src/
 │   │   ├── LaunchPage.astro
 │   │   ├── LaunchPage.animations.ts
 │   │   └── index.ts
+│   ├── LaunchMilestones/
+│   │   ├── LaunchMilestones.astro
+│   │   ├── LaunchMilestones.constants.ts
+│   │   └── index.ts
 │   ├── LaunchTracker/
 │   │   ├── LaunchTracker.astro
 │   │   ├── LaunchTracker.client.ts
 │   │   ├── LaunchTracker.types.ts
+│   │   ├── StreamerRadar.astro
+│   │   ├── StreamerRadar.client.ts
 │   │   ├── CountryCard.astro
 │   │   ├── WorldMap.astro
 │   │   ├── WorldMap.helpers.ts
+│   │   ├── WorldMap.projection.ts
 │   │   └── index.ts
 │   └── ...
 ├── helpers/
@@ -33,7 +40,11 @@ src/
 │   ├── release.helpers.ts
 │   ├── release.helpers.test.ts
 │   ├── search.helpers.ts
-│   └── search.helpers.test.ts
+│   ├── search.helpers.test.ts
+│   ├── streamers.helpers.ts
+│   └── streamers.helpers.test.ts
+api/
+└── streamers.ts
 ├── pages/
 │   ├── index.astro
 │   ├── acerca.astro
