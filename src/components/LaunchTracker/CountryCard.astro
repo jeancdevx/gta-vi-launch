@@ -13,18 +13,19 @@ const offset = utcOffsetLabel(region.zone)
 ---
 
 <article
-  class='country-card group relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line px-1 py-2.5 transition-colors duration-150 ease-out hover:bg-white/[0.03] data-[selected=true]:bg-vice/[0.06] md:grid-cols-[minmax(0,1.9fr)_minmax(0,0.7fr)_minmax(0,1.1fr)_2rem] md:gap-x-6 md:gap-y-0'
+  class='country-card group relative grid country-cols items-center gap-y-1 border-b border-line px-1 py-2.5 transition-colors duration-150 ease-out hover:bg-white/[0.03] data-[selected=true]:bg-vice/[0.06] md:gap-y-0'
   data-region={region.id}
   data-instant={releaseInstant(region.zone)}
   aria-labelledby={`country-${region.id}`}
 >
-  <div class='col-start-1 row-start-1 flex min-w-0 items-center gap-3 md:col-start-1'>
-    <span
-      class='hidden w-6 shrink-0 text-[0.625rem] text-[#8f839b] tabular-nums group-data-[selected=true]:text-vice md:inline'
-      aria-hidden='true'
-    >
-      {String(index + 1).padStart(2, '0')}
-    </span>
+  <span
+    class='hidden text-center text-[0.625rem] leading-4 text-[#8f839b] tabular-nums group-data-[selected=true]:text-vice md:col-start-1 md:row-start-1 md:block'
+    aria-hidden='true'
+  >
+    {String(index + 1).padStart(2, '0')}
+  </span>
+
+  <div class='col-start-1 row-start-1 flex min-w-0 items-center gap-3 md:col-start-2'>
     <span class='text-xl leading-none' aria-hidden='true'>
       {region.flag}
     </span>
@@ -41,7 +42,7 @@ const offset = utcOffsetLabel(region.zone)
     </div>
   </div>
 
-  <div class='col-start-1 row-start-2 flex items-center gap-2 text-xs leading-4 text-muted md:col-start-2 md:row-start-1'>
+  <div class='col-start-1 row-start-2 flex items-center gap-2 text-xs leading-4 text-muted md:col-start-3 md:row-start-1'>
     <span class='text-[#cfc4d7] tabular-nums'>00:00</span>
     <span class='text-[#7f738c]' aria-hidden='true'>
       ·
@@ -49,7 +50,7 @@ const offset = utcOffsetLabel(region.zone)
     <span class='tabular-nums'>{offset}</span>
   </div>
 
-  <div class='col-start-2 row-start-1 text-right md:col-start-3 md:text-left'>
+  <div class='col-start-2 row-start-1 text-right md:col-start-4 md:text-left'>
     <p
       class='country-timer text-xs leading-4 font-semibold tracking-[-0.01em] whitespace-nowrap text-[#e9dfee] tabular-nums group-data-[available=true]:text-mint md:text-sm md:leading-5'
       role='timer'
@@ -62,7 +63,7 @@ const offset = utcOffsetLabel(region.zone)
   </div>
 
   <span
-    class='col-start-2 row-start-2 justify-self-end text-[#7f738c] transition-colors duration-150 ease-out group-hover:text-vice md:col-start-4 md:row-start-1'
+    class='col-start-2 row-start-2 grid size-10 place-items-center justify-self-end border border-white/15 bg-white/[0.03] text-muted transition-[border-color,color,background-color,transform] duration-150 ease-out group-hover:border-vice group-hover:bg-vice/10 group-hover:text-vice group-active:scale-[0.97] group-data-[selected=true]:border-vice/60 group-data-[selected=true]:text-vice md:col-start-5 md:row-span-1 md:row-start-1 md:justify-self-center'
     aria-hidden='true'
   >
     <Icon name='arrow-right' class='size-4' />
