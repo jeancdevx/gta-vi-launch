@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
-    "build": "astro build",
+    "build:api": "node scripts/build-api.mjs",
+    "build": "pnpm build:api && astro build",
     "preview": "astro preview --host 0.0.0.0",
     "check": "astro check",
     "test": "node --experimental-strip-types --test src/helpers/*.test.ts",
@@ -37,6 +38,7 @@
     "@types/d3-geo": "3.1.1",
     "@types/topojson-client": "3.1.5",
     "d3-geo": "3.1.2",
+    "esbuild": "^0.28.2",
     "husky": "9.1.7",
     "lint-staged": "17.6.1",
     "oxfmt": "0.79.0",
