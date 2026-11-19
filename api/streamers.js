@@ -482,32 +482,39 @@ function streamLookupKey(platform, handle) {
 }
 
 // server/streamers.ts
+var DESKTOP_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 var cachedTwitchToken = null;
-async function getTwitchAppToken(clientId, clientSecret) {
-  if (cachedTwitchToken && Date.now() < cachedTwitchToken.expiresAt - 6e4)
-    return cachedTwitchToken.token;
+var cachedKickToken = null;
+async function getOAuthAppToken(tokenUrl, clientId, clientSecret, currentCache) {
+  if (currentCache && Date.now() < currentCache.expiresAt - 6e4)
+    return currentCache;
   const params = new URLSearchParams({
     client_id: clientId,
     client_secret: clientSecret,
     grant_type: "client_credentials"
   });
-  const response = await fetch("https://id.twitch.tv/oauth2/token", {
+  const response = await fetch(tokenUrl, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params
+    body: params,
+    signal: AbortSignal.timeout(5e3)
   });
   if (!response.ok) return null;
   const payload = await response.json();
   if (!payload.access_token) return null;
-  cachedTwitchToken = {
+  return {
     token: payload.access_token,
     expiresAt: Date.now() + (payload.expires_in ?? 3600) * 1e3
   };
-  return cachedTwitchToken.token;
 }
 async function fetchTwitchLiveMap(handles, clientId, clientSecret) {
-  const token = await getTwitchAppToken(clientId, clientSecret);
-  if (!token) return {};
+  cachedTwitchToken = await getOAuthAppToken(
+    "https://id.twitch.tv/oauth2/token",
+    clientId,
+    clientSecret,
+    cachedTwitchToken
+  );
+  if (!cachedTwitchToken) return {};
   const liveMap = {};
   for (let index = 0; index < handles.length; index += 100) {
     const batch = handles.slice(index, index + 100);
@@ -518,8 +525,9 @@ async function fetchTwitchLiveMap(handles, clientId, clientSecret) {
       {
         headers: {
           "Client-Id": clientId,
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${cachedTwitchToken.token}`
+        },
+        signal: AbortSignal.timeout(5e3)
       }
     );
     if (!response.ok) continue;
@@ -547,20 +555,24 @@ async function detectYouTubeLiveVideoId(channelId) {
       `https://www.youtube.com/channel/${channelId}/live`,
       {
         headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Accept-Language": "en-US,en;q=0.9"
+          "User-Agent": DESKTOP_USER_AGENT,
+          "Accept-Language": "en-US,en;q=0.9",
+          Cookie: "SOCS=CAI"
         },
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(5500)
       }
     );
     if (!response.ok) return null;
     const html = await response.text();
-    const isLiveNow = html.includes('"isLiveNow":true');
-    if (!isLiveNow) return null;
-    const match = html.match(
+    const canonicalMatch = html.match(
       /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})"/
     );
-    return match?.[1] ?? null;
+    if (canonicalMatch?.[1]) return canonicalMatch[1];
+    if (html.includes('"isLive":true') || html.includes('"isLiveNow":true')) {
+      const videoIdMatch = html.match(/"videoId":"([A-Za-z0-9_-]{11})"/);
+      return videoIdMatch?.[1] ?? null;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -587,7 +599,7 @@ async function fetchYouTubeLiveMap(channels, apiKey) {
     });
     const response = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?${query.toString()}`,
-      { signal: AbortSignal.timeout(4e3) }
+      { signal: AbortSignal.timeout(5500) }
     );
     if (!response.ok) continue;
     const payload = await response.json();
@@ -597,10 +609,11 @@ async function fetchYouTubeLiveMap(channels, apiKey) {
       const title = item.snippet.title ?? "";
       const viewersRaw = Number(item.liveStreamingDetails?.concurrentViewers);
       const key = streamLookupKey("youtube", handle);
+      const playingGtaVi = isGtaViGame("", title);
       liveMap[key] = {
         live: true,
-        playingGtaVi: isGtaViGame("", title),
-        gameName: isGtaViGame("", title) ? "Grand Theft Auto VI" : "YouTube Live",
+        playingGtaVi,
+        gameName: playingGtaVi ? "Grand Theft Auto VI" : "YouTube Live",
         title,
         viewers: Number.isFinite(viewersRaw) ? viewersRaw : void 0,
         startedAt: item.liveStreamingDetails?.actualStartTime,
@@ -611,40 +624,98 @@ async function fetchYouTubeLiveMap(channels, apiKey) {
   }
   return liveMap;
 }
-async function fetchKickLiveMap(slugs) {
+async function fetchKickOfficialLiveMap(slugs, clientId, clientSecret) {
+  cachedKickToken = await getOAuthAppToken(
+    "https://id.kick.com/oauth/token",
+    clientId,
+    clientSecret,
+    cachedKickToken
+  );
+  if (!cachedKickToken) return null;
+  const query = new URLSearchParams();
+  for (const slug of slugs) query.append("slug", slug);
+  const response = await fetch(
+    `https://api.kick.com/public/v1/channels?${query.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${cachedKickToken.token}`,
+        Accept: "application/json"
+      },
+      signal: AbortSignal.timeout(5e3)
+    }
+  );
+  if (!response.ok) return null;
+  const payload = await response.json();
+  const liveMap = {};
+  for (const channel of payload.data ?? []) {
+    if (!channel.slug || !channel.stream?.is_live) continue;
+    const category = channel.category?.name ?? "";
+    const title = channel.stream_title ?? "";
+    const key = streamLookupKey("kick", channel.slug);
+    liveMap[key] = {
+      live: true,
+      playingGtaVi: isGtaViGame(category, title),
+      gameName: category || "Kick Live",
+      title,
+      viewers: channel.stream.viewer_count,
+      startedAt: channel.stream.start_time,
+      thumbnailUrl: channel.stream.thumbnail,
+      risk: classifySpoilerRisk(title)
+    };
+  }
+  return liveMap;
+}
+async function fetchKickPublicChannel(slug) {
+  const headers = {
+    "User-Agent": DESKTOP_USER_AGENT,
+    Accept: "application/json",
+    Referer: "https://kick.com/",
+    Origin: "https://kick.com"
+  };
+  for (const version of ["v2", "v1"]) {
+    try {
+      const response = await fetch(
+        `https://kick.com/api/${version}/channels/${slug}`,
+        {
+          headers,
+          signal: AbortSignal.timeout(5e3)
+        }
+      );
+      if (!response.ok) continue;
+      return await response.json();
+    } catch {
+    }
+  }
+  return null;
+}
+async function fetchKickLiveMap(slugs, clientId, clientSecret) {
+  if (clientId && clientSecret) {
+    const official = await fetchKickOfficialLiveMap(
+      slugs,
+      clientId,
+      clientSecret
+    ).catch(() => null);
+    if (official) return official;
+  }
   const liveMap = {};
   await Promise.all(
     slugs.map(async (slug) => {
-      try {
-        const response = await fetch(
-          `https://kick.com/api/v2/channels/${slug}`,
-          {
-            headers: {
-              "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-              Accept: "application/json"
-            },
-            signal: AbortSignal.timeout(3500)
-          }
-        );
-        if (!response.ok) return;
-        const payload = await response.json();
-        const stream = payload.livestream;
-        if (!stream?.is_live) return;
-        const category = stream.categories?.[0]?.name ?? "";
-        const title = stream.session_title ?? "";
-        const key = streamLookupKey("kick", slug);
-        liveMap[key] = {
-          live: true,
-          playingGtaVi: isGtaViGame(category, title),
-          gameName: category || "Kick Live",
-          title,
-          viewers: stream.viewer_count,
-          startedAt: stream.created_at,
-          thumbnailUrl: stream.thumbnail?.url,
-          risk: classifySpoilerRisk(title)
-        };
-      } catch {
-      }
+      const payload = await fetchKickPublicChannel(slug);
+      const stream = payload?.livestream;
+      if (!stream?.is_live) return;
+      const category = stream.categories?.[0]?.name ?? "";
+      const title = stream.session_title ?? "";
+      const key = streamLookupKey("kick", slug);
+      liveMap[key] = {
+        live: true,
+        playingGtaVi: isGtaViGame(category, title),
+        gameName: category || "Kick Live",
+        title,
+        viewers: stream.viewer_count,
+        startedAt: stream.created_at,
+        thumbnailUrl: stream.thumbnail?.url,
+        risk: classifySpoilerRisk(title)
+      };
     })
   );
   return liveMap;
@@ -653,17 +724,20 @@ async function GET() {
   const twitchId = process.env.TWITCH_CLIENT_ID?.trim() ?? "";
   const twitchSecret = process.env.TWITCH_CLIENT_SECRET?.trim() ?? "";
   const youtubeKey = process.env.YOUTUBE_API_KEY?.trim() ?? "";
+  const kickId = process.env.KICK_CLIENT_ID?.trim() ?? "";
+  const kickSecret = process.env.KICK_CLIENT_SECRET?.trim() ?? "";
   const enableKick = process.env.ENABLE_KICK_LIVE !== "false";
   const hasTwitch = Boolean(twitchId && twitchSecret);
   const hasYouTube = Boolean(youtubeKey);
-  const configured = hasTwitch || hasYouTube;
+  const hasKickOfficial = Boolean(kickId && kickSecret);
+  const configured = hasTwitch || hasYouTube || hasKickOfficial;
   const tracked = getAllTrackedChannels();
   const [twitchLive, youtubeLive, kickLive] = await Promise.all([
     hasTwitch ? fetchTwitchLiveMap(tracked.twitch, twitchId, twitchSecret).catch(
       () => ({})
     ) : Promise.resolve({}),
     hasYouTube ? fetchYouTubeLiveMap(tracked.youtube, youtubeKey).catch(() => ({})) : Promise.resolve({}),
-    configured && enableKick ? fetchKickLiveMap(tracked.kick).catch(() => ({})) : Promise.resolve({})
+    configured && (enableKick || hasKickOfficial) ? fetchKickLiveMap(tracked.kick, kickId, kickSecret).catch(() => ({})) : Promise.resolve({})
   ]);
   const body = {
     mode: configured ? "live" : "directory",
@@ -672,7 +746,7 @@ async function GET() {
     providers: {
       twitch: hasTwitch,
       youtube: hasYouTube,
-      kick: configured && enableKick
+      kick: configured && (enableKick || hasKickOfficial)
     },
     live: {
       ...kickLive,
