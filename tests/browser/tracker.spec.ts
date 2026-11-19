@@ -140,3 +140,120 @@ test('the static build serves its images and GTA fonts locally', async ({
   expect(assets.remoteImages).toEqual([])
   expect(assets.gtaFonts).toEqual(['loaded', 'loaded'])
 })
+
+test('hero transitions to post-launch phase with multi-day clock and official milestones', async ({
+  page
+}) => {
+  await page.clock.setSystemTime(new Date('2026-11-29T08:15:30Z'))
+  await page.clock.runFor(1000)
+
+  await expect(page.locator('#hero-section')).toHaveAttribute(
+    'data-phase',
+    'live'
+  )
+  await expect(page.locator('#hero-eyebrow')).toHaveText(
+    '19 NOV 2026 · MEDIANOCHE CUMPLIDA'
+  )
+  await expect(page.locator('#clock-days-wrap')).toBeVisible()
+  await expect(page.locator('#clock-days')).toHaveText('10')
+  await expect(page.locator('#clock-hours')).toHaveText('03')
+  await expect(page.locator('#available-count')).toHaveText('40')
+  await expect(page.locator('[data-milestone="gta-online"]')).toContainText(
+    'Sin fecha confirmada'
+  )
+  await expect(page.locator('[data-milestone="pc-release"]')).toContainText(
+    'Sin fecha confirmada'
+  )
+})
+
+test('tactical GTA world map renders real country vectors, sectors and updates radar on pin click', async ({
+  page
+}) => {
+  await expect(page.locator('[data-map-poly]')).toHaveCount(39)
+  await expect(page.locator('[data-map-region]')).toHaveCount(40)
+  await expect(page.locator('#map-midnight-line')).toHaveAttribute('d', /^M/)
+  await expect(page.locator('#map-active-arc')).toHaveAttribute('d', /^M/)
+
+  await page.locator('[data-map-sector="europe"]').click()
+  await expect(page.locator('#map-stage')).toHaveAttribute(
+    'data-sector',
+    'europe'
+  )
+
+  await page.locator('[data-map-region="es"]').click()
+  await expect(page.locator('#map-hud-country')).toHaveText('España · Madrid')
+  await expect(page.locator('#radar-country-name')).toContainText('España')
+  await expect(page.locator('#radar-list')).toContainText('IlloJuan')
+  await expect(page.locator('#radar-list')).toContainText('Vegetta777')
+})
+
+test('streamer radar displays live GTA VI status and spoiler shield masks story titles', async ({
+  page
+}) => {
+  await page.route('**/api/streamers', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        mode: 'live',
+        configured: true,
+        updatedAt: '2026-11-19T15:00:00Z',
+        providers: { twitch: true, youtube: false, kick: false },
+        live: {
+          'twitch:illojuan': {
+            live: true,
+            playingGtaVi: true,
+            gameName: 'Grand Theft Auto VI',
+            title: 'Misión final de la historia de Jason y Lucia en Vice City',
+            viewers: 84200,
+            risk: 'story'
+          },
+          'twitch:rubius': {
+            live: true,
+            playingGtaVi: true,
+            gameName: 'Grand Theft Auto VI',
+            title: 'GTA VI SIN SPOILERS explorando Vice Beach',
+            viewers: 51300,
+            risk: 'spoiler-free'
+          },
+          'twitch:ibai': {
+            live: true,
+            playingGtaVi: false,
+            gameName: 'Just Chatting',
+            title: 'Charlando antes de jugar',
+            viewers: 32000,
+            risk: 'unknown'
+          }
+        }
+      })
+    })
+  )
+
+  await page.goto('/?country=es')
+  await expect(page.locator('#radar-api-status')).toContainText(
+    '2 de 5 canales de España en GTA VI ahora'
+  )
+  await expect(page.locator('#hero-streamer-pulse-text')).toContainText(
+    '2 de 5 en GTA VI desde España'
+  )
+  await expect(page.locator('#radar-global-wrap')).toBeVisible()
+  await expect(page.locator('[data-streamer-id="es-illojuan"]')).toContainText(
+    'Misión final de la historia'
+  )
+
+  await page.locator('[data-spoiler-toggle]').first().click()
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-spoiler-shield',
+    'true'
+  )
+  await expect(page.locator('[data-streamer-id="es-illojuan"]')).toContainText(
+    'Título protegido'
+  )
+  await expect(page.locator('[data-streamer-id="es-rubius"]')).toContainText(
+    'SIN SPOILERS'
+  )
+
+  await page.locator('[data-radar-filter="safe"]').click()
+  await expect(page.locator('#radar-list article')).toHaveCount(1)
+  await expect(page.locator('#radar-list')).toContainText('Rubius')
+})
