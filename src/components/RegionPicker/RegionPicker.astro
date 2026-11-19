@@ -66,23 +66,27 @@ const options = regions
 
   <div
     id='region-backdrop'
-    class='fixed inset-0 z-40 bg-black/70'
+    class='fixed inset-0 z-[60] bg-black/75 backdrop-blur-[2px]'
     data-open='false'
   ></div>
 
   <div
     id='region-panel'
-    class='absolute bottom-full left-0 z-50 mb-3 w-[min(440px,calc(100vw-3rem))] border border-white/20 bg-[#15121d] shadow-[0_28px_90px_rgba(0,0,0,0.65)] max-[600px]:fixed max-[600px]:inset-x-3 max-[600px]:bottom-3 max-[600px]:mb-0 max-[600px]:max-h-[84svh] max-[600px]:w-auto'
+    class='fixed z-[70] flex flex-col overflow-hidden border border-white/20 bg-[#15121d] shadow-[0_28px_90px_rgba(0,0,0,0.72)]'
     role='dialog'
     aria-labelledby='region-panel-title'
     aria-describedby='region-panel-desc'
     hidden
   >
-    <div class='flex items-start justify-between gap-4 px-5 pt-5 pb-4'>
-      <div>
+    <div
+      class='mx-auto mt-2.5 hidden h-1 w-10 bg-white/25 max-[639px]:block'
+      aria-hidden='true'
+    ></div>
+    <div class='flex shrink-0 items-start justify-between gap-4 px-5 pt-4 pb-3.5 max-[639px]:px-4'>
+      <div class='min-w-0'>
         <h2
           id='region-panel-title'
-          class='text-xl leading-6 font-semibold tracking-[-0.02em]'
+          class='text-xl leading-6 font-semibold tracking-[-0.02em] max-[639px]:text-lg'
         >
           Elige tu región
         </h2>
@@ -93,14 +97,14 @@ const options = regions
       <button
         type='button'
         id='region-close'
-        class='-mt-1 grid size-11 shrink-0 place-items-center border border-white/15 text-muted transition-colors duration-150 ease-out hover:border-white/35 hover:text-ink focus-visible:outline-offset-2'
+        class='-mt-1 grid size-11 shrink-0 place-items-center border border-white/15 text-muted transition-[border-color,color,transform] duration-150 ease-out hover:border-white/35 hover:text-ink focus-visible:outline-offset-2 active:scale-[0.97]'
         aria-label='Cerrar el selector de región'
       >
         <Icon name='x' class='size-5' />
       </button>
     </div>
 
-    <div class='flex items-center gap-3 border-y border-white/15 px-5'>
+    <div class='flex shrink-0 items-center gap-3 border-y border-white/15 px-5 max-[639px]:px-4'>
       <Icon name='search' class='size-5 shrink-0 text-muted' />
       <label class='sr-only' for='region-search'>
         Buscar país o ciudad
@@ -128,7 +132,7 @@ const options = regions
 
     <ul
       id='region-listbox'
-      class='h-[min(400px,52svh)] overflow-y-auto overscroll-contain py-1'
+      class='min-h-0 flex-1 overflow-y-auto overscroll-contain py-1'
       role='listbox'
       aria-label='Países y ciudades de referencia'
     >
@@ -146,7 +150,7 @@ const options = regions
           }
           class='group flex min-h-14 cursor-pointer items-center gap-3 border-l-2 border-transparent px-4 py-2.5 transition-colors duration-100 ease-out hover:bg-white/[0.06] aria-selected:border-vice aria-selected:bg-vice/10 data-[active=true]:bg-white/[0.08]'
         >
-          <span class='text-xl leading-none' aria-hidden='true'>
+          <span class='shrink-0 text-xl leading-none' aria-hidden='true'>
             {option.flag}
           </span>
           <span class='min-w-0 flex-1'>
@@ -170,13 +174,13 @@ const options = regions
 
     <p
       id='region-empty'
-      class='grid h-[min(400px,52svh)] place-items-center px-5 text-center text-sm text-muted'
+      class='grid min-h-[200px] flex-1 place-items-center px-5 text-center text-sm text-muted'
       hidden
     >
       No encontramos ese país. Prueba con otra palabra.
     </p>
 
-    <div class='flex items-center justify-between gap-4 border-t border-white/15 px-5 py-3 text-xs leading-4 text-muted'>
+    <div class='flex shrink-0 items-center justify-between gap-4 border-t border-white/15 px-5 py-3 text-xs leading-4 text-muted max-[639px]:px-4'>
       <span>
         {regions.length} países · {options.length} zonas
       </span>
