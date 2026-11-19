@@ -1,24 +1,45 @@
 import {
-  clockState,
-  durationLabel,
-  releaseInstant
+  type LaunchPhase,
+  coarseDurationLabel,
+  compactDurationLabel,
+  detailedClockState,
+  getLaunchPhase,
+  releaseInstant,
+  solarMidnightLongitude
 } from '@/helpers/release.helpers'
 import { matchesSearch } from '@/helpers/search.helpers'
 
 import type { Config } from './LaunchTracker.types'
+import { createStreamerRadar } from './StreamerRadar.client'
+import {
+  type ProjectionMeta,
+  buildMeridianPath,
+  buildSignalArcPath
+} from './WorldMap.projection'
+
+type MapProjectionPayload = {
+  meta: ProjectionMeta
+  viceCity: [number, number]
+  pins: Record<string, [number, number]>
+}
 
 const config = JSON.parse(
   document.querySelector('#release-data')!.textContent!
 ) as Config
+const mapData = JSON.parse(
+  document.querySelector('#map-projection-data')!.textContent!
+) as MapProjectionPayload
+
 const { regions, alternateZones } = config
 const byId = new Map(regions.map(region => [region.id, region]))
 const instants = new Map(
   regions.map(region => [region.id, releaseInstant(region.zone)])
 )
+const allInstants = [...instants.values()]
 
-const $ = <T extends HTMLElement = HTMLElement>(selector: string) =>
+const $ = <T extends Element = HTMLElement>(selector: string) =>
   document.querySelector<T>(selector)!
-const $$ = <T extends HTMLElement = HTMLElement>(selector: string) => [
+const $$ = <T extends Element = HTMLElement>(selector: string) => [
   ...document.querySelectorAll<T>(selector)
 ]
 
@@ -51,6 +72,12 @@ const cards = $$('[data-region]')
     timer: element.querySelector<HTMLElement>('.country-timer')!
   }))
 const mapPins = $$<HTMLButtonElement>('[data-map-region]')
+const mapPolygons = $$<SVGPathElement>('[data-map-poly]')
+const mapSectorButtons = $$<HTMLButtonElement>('[data-map-sector]')
+const mapStage = $('#map-stage')
+const mapActiveArc = document.querySelector<SVGPathElement>('#map-active-arc')
+const mapMidnightLine =
+  document.querySelector<SVGPathElement>('#map-midnight-line')
 const url = new URL(location.href)
 const mobileQuery = matchMedia('(max-width: 600px)')
 
@@ -63,15 +90,17 @@ let activeRegion = byId.get('pe') ?? regions[0]!
 let activeZone = activeRegion.zone
 let selectedInstant = releaseInstant(activeZone)
 let selectedAvailable: boolean | undefined
+let currentPhase: LaunchPhase | undefined
 let lastAvailability = ''
 let activeOptionId = ''
+let hoveredMapRegionId: string | null = null
 
 search.value = (url.searchParams.get('q') ?? '').slice(0, 120)
 
 function setText(selector: string, value: string) {
-  const element = $(selector)
-
-  if (element.textContent !== value) element.textContent = value
+  for (const element of document.querySelectorAll<HTMLElement>(selector)) {
+    if (element.textContent !== value) element.textContent = value
+  }
 }
 
 function updateUrl() {
@@ -199,6 +228,131 @@ function renderZones(options: { city: string; zone: string }[]) {
   zoneWrap.hidden = options.length < 2
 }
 
+const streamerRadar = createStreamerRadar(regions, () => {
+  syncStreamerSignals()
+  updateMapHud(hoveredMapRegionId ?? activeRegion.id)
+})
+
+function syncStreamerSignals() {
+  const heroSummary = streamerRadar.getCountrySummary(activeRegion.id)
+  const heroPulse = document.querySelector<HTMLElement>('#hero-streamer-pulse')
+
+  if (heroPulse) heroPulse.hidden = !heroSummary.apiLive
+
+  setText(
+    '#hero-streamer-pulse-text',
+    heroSummary.liveGtaVi > 0
+      ? `${heroSummary.liveGtaVi} de ${heroSummary.total} en GTA VI desde ${activeRegion.country}`
+      : `Radar de creadores de ${activeRegion.country}`
+  )
+
+  for (const card of cards) {
+    const summary = streamerRadar.getCountrySummary(card.region.id)
+    const hasLocalLive =
+      summary.apiLive && summary.scope === 'country' && summary.liveGtaVi > 0
+
+    card.element.dataset.live = String(hasLocalLive)
+  }
+
+  for (const pin of mapPins) {
+    const summary = streamerRadar.getCountrySummary(pin.dataset.mapRegion!)
+
+    pin.dataset.live = String(
+      summary.apiLive && summary.scope === 'country' && summary.liveGtaVi > 0
+    )
+  }
+
+  for (const poly of mapPolygons) {
+    const summary = streamerRadar.getCountrySummary(poly.dataset.mapPoly!)
+
+    poly.dataset.live = String(
+      summary.apiLive && summary.scope === 'country' && summary.liveGtaVi > 0
+    )
+  }
+}
+
+function updateMapArc(regionId: string) {
+  if (!mapActiveArc) return
+
+  const target = mapData.pins[regionId]
+
+  if (!target) return
+
+  mapActiveArc.setAttribute('d', buildSignalArcPath(mapData.viceCity, target))
+}
+
+function updateMapHud(regionId: string, now = Date.now()) {
+  const region = byId.get(regionId) ?? activeRegion
+  const instant = instants.get(region.id) ?? selectedInstant
+  const available = now >= instant
+  const summary = streamerRadar.getCountrySummary(region.id)
+
+  setText('#map-hud-flag', region.flag)
+  setText('[data-map-hud-flag]', region.flag)
+  setText('#map-hud-country', `${region.country} · ${region.city}`)
+  setText('[data-map-hud-country]', `${region.country} · ${region.city}`)
+
+  const statusText =
+    summary.apiLive && summary.liveGtaVi > 0
+      ? `${summary.liveGtaVi} de ${summary.total} en GTA VI ahora · ${compactDurationLabel(instant, now)}`
+      : `${available ? 'Disponible' : 'En espera'} · ${compactDurationLabel(instant, now)}`
+
+  setText('#map-hud-status', statusText)
+  setText('[data-map-hud-status]', statusText)
+  updateMapArc(region.id)
+}
+
+function applyLaunchPhase(phase: LaunchPhase) {
+  if (currentPhase === phase) return
+
+  currentPhase = phase
+  const heroSection = document.querySelector<HTMLElement>('#hero-section')
+
+  if (heroSection) heroSection.dataset.phase = phase
+
+  const launchBadge = document.querySelector<HTMLElement>(
+    '[data-milestone-badge="console-launch"]'
+  )
+
+  if (phase === 'countdown') {
+    setText('#hero-eyebrow', '19 NOV 2026 · LANZAMIENTO MUNDIAL')
+    setText('#hero-title-main', 'Vice City abre')
+    setText('#hero-title-accent', ' a medianoche.')
+    setText(
+      '#hero-subtitle',
+      'Elige tu país y sigue la hora local de referencia. Consulta también los canales que cubren el lanzamiento.'
+    )
+    setText('#tracker-title-main', 'Quién abre')
+    setText('#tracker-title-accent', 'primero.')
+
+    if (launchBadge) launchBadge.textContent = 'Confirmado por Rockstar'
+  } else if (phase === 'wave') {
+    setText('#hero-eyebrow', '19 NOV 2026 · OLA DE DESBLOQUEO EN CURSO')
+    setText('#hero-title-main', 'La medianoche ya')
+    setText('#hero-title-accent', ' cruza el mapa.')
+    setText(
+      '#hero-subtitle',
+      'La ola avanza país por país. Sigue tu reloj y los canales que cubren el lanzamiento.'
+    )
+    setText('#tracker-title-main', 'Quién abre')
+    setText('#tracker-title-accent', 'primero.')
+
+    if (launchBadge) launchBadge.textContent = 'Desbloqueo en curso'
+  } else {
+    setText('#hero-eyebrow', '19 NOV 2026 · MEDIANOCHE CUMPLIDA')
+    setText('#hero-title-main', 'Todos los relojes')
+    setText('#hero-title-accent', ' ya cambiaron.')
+    setText(
+      '#hero-subtitle',
+      'Los 40 países ya cruzaron su medianoche. Sigue los canales por país, activa el escudo sin spoilers y revisa los hitos oficiales.'
+    )
+    setText('#tracker-title-main', 'Radar de')
+    setText('#tracker-title-accent', 'Leonida.')
+
+    if (launchBadge) launchBadge.textContent = 'Ya disponible en consolas'
+  }
+}
+
 function chooseRegion(id: string, zone?: string, announce = false) {
   activeRegion = byId.get(id) ?? activeRegion
   const options = [
@@ -237,15 +391,18 @@ function chooseRegion(id: string, zone?: string, announce = false) {
       String(pin.dataset.mapRegion === activeRegion.id)
     )
 
+  for (const poly of mapPolygons)
+    poly.dataset.selected = String(poly.dataset.mapPoly === activeRegion.id)
+
   for (const card of cards)
     card.element.dataset.selected = String(card.region.id === activeRegion.id)
 
-  setText('#local-release', `19 NOV 2026 · 00:00 · ${city}`)
+  setText('#local-release', '19 NOV 2026 · 00:00')
 
   if (announce)
     setText(
       '#selection-feedback',
-      `Contador de ${activeRegion.country}, ${city}.`
+      `Contador y radar de ${activeRegion.country}, ${city}.`
     )
 
   try {
@@ -257,6 +414,8 @@ function chooseRegion(id: string, zone?: string, announce = false) {
     /* Storage can be unavailable in private browsing. */
   }
 
+  streamerRadar.setRegion(activeRegion.id)
+  syncStreamerSignals()
   updateUrl()
   tick()
 }
@@ -271,10 +430,19 @@ const utcFormatter = new Intl.DateTimeFormat('es', {
 
 function tick() {
   const now = Date.now()
-  const state = clockState(selectedInstant, now)
+  const state = detailedClockState(selectedInstant, now)
   const pad = (value: number) => String(value).padStart(2, '0')
+  const daysWrap = document.querySelector<HTMLElement>('#clock-days-wrap')
 
-  setText('#clock-hours', pad(state.hours))
+  if (state.days >= 1) {
+    if (daysWrap) daysWrap.hidden = false
+    setText('#clock-days', pad(state.days))
+    setText('#clock-hours', pad(state.hours))
+  } else {
+    if (daysWrap) daysWrap.hidden = true
+    setText('#clock-hours', pad(state.totalHours))
+  }
+
   setText('#clock-minutes', pad(state.minutes))
   setText('#clock-seconds', pad(state.seconds))
 
@@ -299,6 +467,8 @@ function tick() {
     $('#mi-region').classList.toggle('has-launched', state.available)
   }
 
+  applyLaunchPhase(getLaunchPhase(allInstants, now))
+
   let availableCount = 0
   let availability = ''
 
@@ -315,16 +485,33 @@ function tick() {
       card.element.dataset.available = String(available)
     }
 
-    card.timer.textContent = durationLabel(card.instant, now)
+    card.timer.textContent = coarseDurationLabel(card.instant, now)
   }
 
   for (const pin of mapPins)
     pin.dataset.available = String(now >= instants.get(pin.dataset.mapRegion!)!)
 
+  for (const poly of mapPolygons)
+    poly.dataset.available = String(now >= instants.get(poly.dataset.mapPoly!)!)
+
+  if (mapMidnightLine) {
+    mapMidnightLine.setAttribute(
+      'd',
+      buildMeridianPath(solarMidnightLongitude(now), mapData.meta)
+    )
+  }
+
+  updateMapHud(hoveredMapRegionId ?? activeRegion.id, now)
+
   setText('#available-count', String(availableCount).padStart(2, '0'))
+  const pendingCount = regions.length - availableCount
+
+  setText('#pending-count', String(pendingCount).padStart(2, '0'))
   setText(
-    '#pending-count',
-    String(regions.length - availableCount).padStart(2, '0')
+    '#pending-label',
+    pendingCount === 0
+      ? 'países en espera. Todos los territorios ya están en Leonida.'
+      : 'países todavía esperan la medianoche.'
   )
 
   const percentage = String(Math.round((availableCount / regions.length) * 100))
@@ -343,7 +530,7 @@ function tick() {
   }
 
   setText('#filter-available-count', String(availableCount))
-  setText('#filter-pending-count', String(regions.length - availableCount))
+  setText('#filter-pending-count', String(pendingCount))
   setText('#utc-clock', `${utcFormatter.format(now)} UTC`)
 
   if (availability !== lastAvailability) {
@@ -553,24 +740,64 @@ $('#clear-filters').addEventListener('click', () => {
   search.focus()
 })
 
-function showRegion(id: string) {
-  chooseRegion(id, undefined, true)
-  closePicker(false)
-  $('#mi-region').scrollIntoView({
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 'instant'
-      : 'smooth',
-    block: 'center'
+for (const button of mapSectorButtons) {
+  button.addEventListener('click', () => {
+    const sector = button.dataset.mapSector ?? 'global'
+    const transform =
+      button.dataset.sectorTransform ?? 'translate(0%, 0%) scale(1)'
+
+    mapStage.dataset.sector = sector
+    mapStage.style.transform = transform
+
+    for (const item of mapSectorButtons)
+      item.setAttribute('aria-pressed', String(item === button))
   })
-  trigger.focus({ preventScroll: true })
 }
 
-for (const button of $$<HTMLButtonElement>(
-  '[data-choose-region], [data-map-region]'
-))
+function showRegion(id: string, scrollToHero = true) {
+  chooseRegion(id, undefined, true)
+  closePicker(false)
+
+  if (scrollToHero) {
+    $('#mi-region').scrollIntoView({
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+      block: 'center'
+    })
+    trigger.focus({ preventScroll: true })
+  }
+}
+
+for (const button of $$<HTMLButtonElement>('[data-choose-region]'))
   button.addEventListener('click', () => {
-    showRegion(button.dataset.chooseRegion ?? button.dataset.mapRegion!)
+    showRegion(button.dataset.chooseRegion!, true)
   })
+
+for (const pin of mapPins) {
+  const id = pin.dataset.mapRegion!
+
+  pin.addEventListener('click', () => {
+    hoveredMapRegionId = null
+    showRegion(id, false)
+  })
+  pin.addEventListener('pointerenter', () => {
+    hoveredMapRegionId = id
+    updateMapHud(id)
+  })
+  pin.addEventListener('pointerleave', () => {
+    hoveredMapRegionId = null
+    updateMapHud(activeRegion.id)
+  })
+  pin.addEventListener('focus', () => {
+    hoveredMapRegionId = id
+    updateMapHud(id)
+  })
+  pin.addEventListener('blur', () => {
+    hoveredMapRegionId = null
+    updateMapHud(activeRegion.id)
+  })
+}
 
 let interval: ReturnType<typeof setInterval> | undefined
 

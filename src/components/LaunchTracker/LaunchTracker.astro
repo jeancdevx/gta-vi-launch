@@ -5,6 +5,7 @@ import { alternateZones, regions, release } from '@/constants'
 import { releaseInstant } from '@/helpers/release.helpers'
 
 import CountryCard from './CountryCard.astro'
+import StreamerRadar from './StreamerRadar.astro'
 import WorldMap from './WorldMap.astro'
 
 const ordered = [...regions].sort(
@@ -24,19 +25,26 @@ const ordered = [...regions].sort(
     data-reveal
   >
     <div>
-      <p class='eyebrow text-vice'>EL TABLERO</p>
+      <p id='tracker-eyebrow' class='eyebrow text-vice'>
+        EL TABLERO
+      </p>
       <h2
         id='tracker-title'
         class='mt-6 max-w-[680px] text-5xl leading-[0.95] font-semibold tracking-[-0.04em] max-[600px]:mt-4 max-[600px]:text-4xl max-[600px]:leading-10'
       >
-        Quién abre
+        <span id='tracker-title-main'>Quién abre</span>
         <br />
-        <span class='text-vice'>primero.</span>
+        <span id='tracker-title-accent' class='text-vice'>
+          primero.
+        </span>
       </h2>
     </div>
-    <p class='max-w-[360px] text-base leading-6 text-muted max-[900px]:max-w-[480px]'>
+    <p
+      id='tracker-subtitle'
+      class='max-w-[380px] text-base leading-6 text-muted max-[900px]:max-w-[480px]'
+    >
       Cuarenta países ordenados por su medianoche local. Elige una fila para
-      llevar ese contador a la portada.
+      llevar ese reloj a la portada y abrir el radar del país.
     </p>
   </div>
 
@@ -59,7 +67,12 @@ const ordered = [...regions].sort(
 
     <div class='min-w-0'>
       <div class='flex items-baseline justify-between gap-4 text-xs leading-4'>
-        <span class='tracking-[0.14em] text-muted uppercase'>Progreso</span>
+        <span
+          id='progress-label'
+          class='tracking-[0.14em] text-muted uppercase'
+        >
+          Progreso
+        </span>
         <span
           class='text-2xl leading-none font-medium text-ink tabular-nums max-[600px]:text-xl'
           id='progress-number'
@@ -81,11 +94,11 @@ const ordered = [...regions].sort(
           id='progress-fill'
         ></div>
       </div>
-      <p class='mt-3 text-xs leading-4 text-muted'>
+      <p id='progress-caption' class='mt-3 text-xs leading-4 text-muted'>
         <span class='text-vice' id='pending-count'>
           40
         </span>{' '}
-        países todavía esperan la medianoche.
+        <span id='pending-label'>países todavía esperan la medianoche.</span>
       </p>
     </div>
 
@@ -104,7 +117,7 @@ const ordered = [...regions].sort(
     <WorldMap />
   </div>
 
-  <div class='mt-8 flex items-center justify-between gap-6 max-[900px]:gap-4 max-[600px]:mt-6 max-[600px]:flex-col max-[600px]:items-stretch'>
+  <div class='mt-14 flex items-center justify-between gap-6 border-t border-line pt-10 max-[900px]:gap-4 max-[600px]:mt-10 max-[600px]:flex-col max-[600px]:items-stretch max-[600px]:pt-8'>
     <div
       class='flex gap-6 max-[600px]:justify-between max-[600px]:gap-2'
       role='group'
@@ -176,15 +189,15 @@ const ordered = [...regions].sort(
       </span>
       <span>
         <span class='mr-1.5 inline-block size-1.5 bg-vice align-middle'></span>
-        En espera
+        En espera / En vivo
       </span>
     </p>
   </div>
 
-  <div class='hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,1fr)_3rem] items-center gap-6 border-b border-line pt-5 pb-2 text-[0.625rem] font-semibold tracking-[0.18em] text-muted uppercase md:grid'>
+  <div class='hidden grid-cols-[minmax(0,1.9fr)_minmax(0,0.7fr)_minmax(0,1.1fr)_3rem] items-center gap-6 border-b border-line pt-5 pb-2 text-[0.625rem] font-semibold tracking-[0.18em] text-muted uppercase md:grid'>
     <span>País · ciudad</span>
     <span>Hora local</span>
-    <span>Cuenta regresiva</span>
+    <span>Tiempo</span>
     <span class='sr-only'>Abrir contador</span>
   </div>
 
@@ -209,10 +222,13 @@ const ordered = [...regions].sort(
     </Button>
   </div>
 
+  <StreamerRadar />
+
   <p class='mt-8 max-w-[880px] text-sm leading-5 text-muted max-[600px]:mt-6 max-[600px]:text-xs max-[600px]:leading-4'>
-    Seguimiento de {regions.length} países, con la ciudad de referencia
-    indicada. Los estados se calculan según el horario publicado, sin conexión
-    con tu consola.
+    Seguimiento de {regions.length} países con la ciudad de referencia indicada.
+    Los estados se calculan con el horario publicado, sin conexión con tu
+    consola. El radar enlaza canales públicos y actualiza su estado cada minuto
+    cuando está disponible.{' '}
     <a
       href='#como-funciona'
       class='text-vice underline underline-offset-4 transition-colors duration-200 ease-out hover:text-peach'
@@ -223,9 +239,9 @@ const ordered = [...regions].sort(
 
   <noscript>
     <p class='mt-6 border-y border-line py-5 text-peach'>
-      Activa JavaScript para ver los contadores en tiempo real. La hora de
-      referencia es el 19 de noviembre de 2026 a las 00:00 en la zona indicada
-      en cada país.
+      Activa JavaScript para ver los contadores en tiempo real y el radar por
+      país. La hora de referencia es el 19 de noviembre de 2026 a las 00:00 en
+      la zona indicada en cada país.
     </p>
   </noscript>
 </section>
