@@ -79,7 +79,11 @@ const mapActiveArc = document.querySelector<SVGPathElement>('#map-active-arc')
 const mapMidnightLine =
   document.querySelector<SVGPathElement>('#map-midnight-line')
 const url = new URL(location.href)
-const mobileQuery = matchMedia('(max-width: 600px)')
+const mobileQuery = matchMedia('(max-width: 639px)')
+
+// Portal the backdrop and dialog to body so Hero's isolate/overflow-clip never
+// traps them underneath the header or clips them on shorter viewports.
+document.body.append(backdrop, panel)
 
 let filter = ['all', 'available', 'pending'].includes(
   url.searchParams.get('status') ?? ''
@@ -178,6 +182,54 @@ function filterOptions(query: string) {
   if (!current || current.hidden) setActiveOption(visibleOptions()[0]!, false)
 }
 
+function positionPicker() {
+  if (panel.hidden) return
+
+  if (mobileQuery.matches) {
+    panel.style.left = '0.75rem'
+    panel.style.right = '0.75rem'
+    panel.style.bottom = '0.75rem'
+    panel.style.top = 'auto'
+    panel.style.width = 'auto'
+    panel.style.maxHeight = 'min(82svh, calc(100svh - 1.5rem))'
+    panel.style.transformOrigin = 'bottom center'
+
+    return
+  }
+
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+  const triggerRect = trigger.getBoundingClientRect()
+  const headerRect = document.querySelector('header')?.getBoundingClientRect()
+  const headerBottom = headerRect ? Math.max(0, headerRect.bottom) : 0
+  const panelWidth = Math.min(440, vw - 32)
+  const left = Math.max(16, Math.min(triggerRect.left, vw - panelWidth - 16))
+  const safeTop = Math.max(16, headerBottom + 16)
+  const gap = 12
+  const spaceAbove = triggerRect.top - gap - safeTop
+  const spaceBelow = vh - triggerRect.bottom - gap - 16
+
+  panel.style.left = `${Math.round(left)}px`
+  panel.style.right = 'auto'
+  panel.style.width = `${Math.round(panelWidth)}px`
+
+  if (spaceAbove >= 260 || spaceAbove >= spaceBelow) {
+    const maxHeight = Math.min(500, Math.max(220, Math.floor(spaceAbove)))
+
+    panel.style.bottom = `${Math.round(vh - triggerRect.top + gap)}px`
+    panel.style.top = 'auto'
+    panel.style.maxHeight = `${maxHeight}px`
+    panel.style.transformOrigin = 'bottom left'
+  } else {
+    const maxHeight = Math.min(500, Math.max(220, Math.floor(spaceBelow)))
+
+    panel.style.top = `${Math.round(Math.max(safeTop, triggerRect.bottom + gap))}px`
+    panel.style.bottom = 'auto'
+    panel.style.maxHeight = `${maxHeight}px`
+    panel.style.transformOrigin = 'top left'
+  }
+}
+
 function openPicker() {
   panel.hidden = false
   panel.setAttribute('aria-modal', String(mobileQuery.matches))
@@ -186,6 +238,7 @@ function openPicker() {
   regionSearch.setAttribute('aria-expanded', 'true')
   regionSearch.value = ''
   filterOptions('')
+  positionPicker()
 
   const selected = optionByKey.get(optionKey(activeRegion.id, activeZone))
 
@@ -717,8 +770,13 @@ panel.addEventListener('keydown', event => {
 document.addEventListener('pointerdown', event => {
   if (panel.hidden) return
 
-  if (!picker.contains(event.target as Node)) closePicker(false)
+  const target = event.target as Node
+
+  if (!picker.contains(target) && !panel.contains(target)) closePicker(false)
 })
+
+window.addEventListener('resize', positionPicker)
+window.addEventListener('scroll', positionPicker, { passive: true })
 
 search.addEventListener('input', () => {
   applyFilters()
