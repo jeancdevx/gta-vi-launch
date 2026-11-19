@@ -1,0 +1,162 @@
+---
+import Icon from '@/components/Icon'
+import { getStreamersForRegion } from '@/helpers/streamers.helpers'
+
+const initial = getStreamersForRegion('pe')
+---
+
+<section
+  id='radar-streamers'
+  class='mt-14 scroll-mt-24 border-t border-line pt-12 max-[600px]:mt-10 max-[600px]:pt-8'
+  aria-labelledby='radar-title'
+>
+  <div class='flex flex-wrap items-end justify-between gap-6'>
+    <div>
+      <p class='flex items-center gap-2 eyebrow text-peach'>
+        <Icon name='signal' size={14} class='shrink-0' />
+        CREADORES POR PAÍS
+      </p>
+      <h3
+        id='radar-title'
+        class='mt-4 text-3xl leading-9 font-semibold tracking-[-0.03em] max-[600px]:text-2xl max-[600px]:leading-8'
+      >
+        Los canales que seguimos desde
+        <span id='radar-country-name' class='text-vice'>
+          Perú
+        </span>
+        .
+      </h3>
+      <p
+        id='radar-scope-label'
+        class='mt-2 max-w-[560px] text-sm leading-5 text-muted'
+      >
+        {initial.label} · Lima (América). Cambia de país en el mapa o el tablero
+        para ver otros canales.
+      </p>
+    </div>
+
+    <button
+      type='button'
+      data-spoiler-toggle
+      aria-pressed='false'
+      aria-label='Activar escudo sin spoilers'
+      class='inline-flex min-h-10 items-center gap-2.5 border border-white/20 px-3.5 text-xs leading-4 font-semibold tracking-[0.08em] text-muted uppercase transition-[border-color,color,transform] duration-150 ease-out hover:border-vice/60 hover:text-ink active:scale-[0.97] aria-pressed:border-mint aria-pressed:text-mint'
+    >
+      <Icon name='shield' size={15} class='shrink-0' />
+      <span>Escudo sin spoilers</span>
+      <span
+        data-spoiler-state
+        class='border-l border-white/15 pl-2 text-[0.625rem] tracking-[0.14em]'
+      >
+        Inactivo
+      </span>
+    </button>
+  </div>
+
+  <div class='mt-6 flex flex-wrap items-center justify-between gap-4 border-y border-line py-2.5 text-xs leading-4'>
+    <div
+      class='flex flex-wrap items-center gap-5'
+      role='group'
+      aria-label='Filtrar creadores del radar'
+    >
+      <button
+        type='button'
+        data-radar-filter='all'
+        aria-pressed='true'
+        class='min-h-9 border-b-2 border-transparent px-1 text-xs leading-4 font-semibold tracking-[0.08em] text-muted uppercase transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink'
+      >
+        Todos
+      </button>
+      <button
+        type='button'
+        data-radar-filter='gtavi'
+        aria-pressed='false'
+        class='min-h-9 border-b-2 border-transparent px-1 text-xs leading-4 font-semibold tracking-[0.08em] text-muted uppercase transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink'
+      >
+        En directo
+      </button>
+      <button
+        type='button'
+        data-radar-filter='safe'
+        aria-pressed='false'
+        class='min-h-9 border-b-2 border-transparent px-1 text-xs leading-4 font-semibold tracking-[0.08em] text-muted uppercase transition-colors duration-150 ease-out hover:text-ink aria-pressed:border-vice aria-pressed:text-ink'
+      >
+        Seguros
+      </button>
+    </div>
+
+    <p id='radar-api-status' class='text-muted' role='status'>
+      Estado en vivo no disponible · abre un canal para comprobarlo
+    </p>
+  </div>
+
+  <div
+    id='radar-list'
+    class='divide-y divide-line border-b border-line'
+    aria-live='polite'
+  >
+    {initial.streamers.map((creator, index) => (
+      <article
+        class='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-1 py-3 transition-colors duration-150 ease-out hover:bg-white/[0.02]'
+        data-streamer-id={creator.id}
+      >
+        <div class='flex min-w-0 items-center gap-3'>
+          <span
+            class='w-6 shrink-0 text-[0.625rem] text-[#8f839b] tabular-nums'
+            aria-hidden='true'
+          >
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <div class='min-w-0'>
+            <div class='flex items-center gap-2'>
+              <h4 class='truncate text-sm leading-5 font-semibold text-ink'>
+                {creator.name}
+              </h4>
+              <span class='shrink-0 border border-white/15 px-1.5 py-0.5 text-[0.625rem] leading-3 font-semibold tracking-[0.08em] text-muted uppercase'>
+                {creator.platform}
+              </span>
+            </div>
+            <p class='mt-0.5 truncate text-xs leading-4 text-muted'>
+              @{creator.handle} · {creator.focus}
+            </p>
+          </div>
+        </div>
+
+        <a
+          href={creator.url}
+          target='_blank'
+          rel='noopener noreferrer'
+          aria-label={`Abrir canal de ${creator.name} en ${creator.platform}`}
+          class='inline-flex min-h-10 shrink-0 items-center gap-1.5 px-1 text-xs leading-4 font-semibold text-muted transition-colors duration-150 ease-out hover:text-vice'
+        >
+          Abrir canal
+          <Icon name='external' size={13} class='shrink-0' />
+        </a>
+      </article>
+    ))}
+  </div>
+
+  <div
+    id='radar-empty'
+    class='border-b border-line px-6 py-10 text-center'
+    hidden
+  >
+    <p class='text-base leading-6 font-medium text-ink' id='radar-empty-title'>
+      Ningún canal de este país coincide con el filtro.
+    </p>
+    <p class='mt-2 text-sm leading-5 text-muted'>
+      Cambia el filtro a Todos para ver el directorio completo.
+    </p>
+  </div>
+
+  <div id='radar-global-wrap' class='mt-8' hidden>
+    <div class='flex items-baseline justify-between gap-4'>
+      <p class='eyebrow text-mint'>PULSO MUNDIAL EN GTA VI AHORA</p>
+      <p id='radar-global-count' class='text-xs text-muted tabular-nums'></p>
+    </div>
+    <div
+      id='radar-global-list'
+      class='mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3'
+    ></div>
+  </div>
+</section>
