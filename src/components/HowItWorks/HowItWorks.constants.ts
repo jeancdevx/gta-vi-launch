@@ -24,8 +24,8 @@ export const faqs = [
     'Se recalculan cada segundo con la hora de tu dispositivo. Al regresar a la pestaña se actualizan de inmediato. Si tu reloj está desajustado, los contadores también lo estarán.'
   ],
   [
-    '¿Cómo funciona el radar de streamers por país?',
-    'Cada país muestra una selección curada de cinco creadores con enlaces directos a sus canales. Cuando el servidor tiene credenciales de Twitch API configuradas, el endpoint público actualiza cada minuto quién está en directo jugando Grand Theft Auto VI y cuántos espectadores tiene.'
+    '¿Cómo funciona el radar de creadores por país?',
+    'Cada país muestra hasta cinco canales con enlaces directos. Cuando hay estado en vivo disponible, indica quién está emitiendo GTA VI y cuántas personas lo ven; si no, puedes abrir cada canal para comprobarlo.'
   ],
   [
     '¿Qué protege el Escudo sin spoilers?',
