@@ -13,6 +13,10 @@ type IconName =
   | 'check'
   | 'crosshair'
   | 'x'
+  | 'shield'
+  | 'signal'
+  | 'eye-off'
+  | 'play'
 
 interface Props {
   name: IconName
@@ -79,4 +83,22 @@ const { name, class: className, size = 24 } = Astro.props
       <path d='M12 2v3M12 19v3M2 12h3M19 12h3' />
     </>
   )}
+  {name === 'shield' && (
+    <path d='M12 3 5 6v6c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6l-7-3Z' />
+  )}
+  {name === 'signal' && (
+    <>
+      <circle cx='12' cy='12' r='2' />
+      <path d='M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.5 5.5a9.2 9.2 0 0 0 0 13M18.5 5.5a9.2 9.2 0 0 1 0 13' />
+    </>
+  )}
+  {name === 'eye-off' && (
+    <>
+      <path d='M3 3l18 18' />
+      <path d='M10.6 10.6a2 2 0 0 0 2.8 2.8' />
+      <path d='M9.9 5.2A10.7 10.7 0 0 1 12 5c4.6 0 8.2 3 9.5 7-.6 1.8-1.7 3.4-3.2 4.6' />
+      <path d='M6.3 6.3C4.5 7.6 3.2 9.6 2.5 12c1.3 4 4.9 7 9.5 7 1.6 0 3.1-.4 4.4-1' />
+    </>
+  )}
+  {name === 'play' && <path d='M8 6v12l10-6-10-6Z' />}
 </svg>
