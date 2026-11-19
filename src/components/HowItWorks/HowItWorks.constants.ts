@@ -22,5 +22,13 @@ export const faqs = [
   [
     '¿Cómo se actualizan los contadores?',
     'Se recalculan cada segundo con la hora de tu dispositivo. Al regresar a la pestaña se actualizan de inmediato. Si tu reloj está desajustado, los contadores también lo estarán.'
+  ],
+  [
+    '¿Cómo funciona el radar de streamers por país?',
+    'Cada país muestra una selección curada de cinco creadores con enlaces directos a sus canales. Cuando el servidor tiene credenciales de Twitch API configuradas, el endpoint público actualiza cada minuto quién está en directo jugando Grand Theft Auto VI y cuántos espectadores tiene.'
+  ],
+  [
+    '¿Qué protege el Escudo sin spoilers?',
+    'Oculta títulos de directos marcados como modo historia o sin clasificar, y difumina notas sensibles en los hitos de actualizaciones. Tu preferencia se guarda solo en tu navegador.'
   ]
 ]
