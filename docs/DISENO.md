@@ -2,20 +2,22 @@
 
 ## Estructura y acción principal
 
-Landing breve orientada a la consulta: portada cinematográfica, contador de la
-región, avance mundial, listado filtrable, momento editorial con arte,
-explicación de tres pasos, preguntas y créditos. La acción principal es **Ver mi
-país**. No se requiere cuenta.
+Landing breve orientada a la consulta: portada cinematográfica, selector de
+región, contador local, mapa mundial, tablero filtrable, creadores por país,
+hitos oficiales, explicación de tres pasos, preguntas y créditos. La acción
+principal es **Mi región**. No se requiere cuenta.
 
-Hero: **La espera termina.** Subtítulo: **Una nueva era. Una medianoche a la
-vez. Sigue la llegada de GTA VI, país por país.** Señal de confianza: la fecha y
-los horarios enlazan a Rockstar Support.
+Hero: **Vice City abre a medianoche.** Durante la ola: **La medianoche ya cruza
+el mapa.** Subtítulo: **Elige tu país y sigue la hora local de referencia.**
+Señal de confianza: la fecha y los horarios enlazan a Rockstar Support. La
+cabecera mantiene solo el logotipo, cuatro enlaces y **Mi región**; no incluye
+una tira decorativa con fecha y hora.
 
 Beneficios: consulta el tiempo restante; ve el tiempo transcurrido; cambia de
 región sin cálculos manuales; busca países y ciudades; comparte una consulta
 mediante su URL.
 
-Tres pasos: encuentra tu región, sigue la cuenta regresiva, ve quién ya llegó.
+Tres pasos: encuentra tu región, sigue la cuenta regresiva, el mapa se enciende.
 
 ## Preguntas cubiertas
 
@@ -31,11 +33,9 @@ Tres pasos: encuentra tu región, sigue la cuenta regresiva, ve quién ya llegó
 
 ## SEO
 
-`noindex, follow` durante el lanzamiento y el desarrollo, por su vigencia breve
-y porque los assets deben completarse. Título: **GTA VI · El mundo entra a Vice
-City**. Descripción: seguimiento por país y cuenta regresiva del lanzamiento.
-Open Graph, favicon y 404 incluidos. Cambiar la política de indexación cuando
-exista una URL pública y una política de mantenimiento definida.
+`noindex, follow` mientras siga siendo un proyecto de fans no oficial. Título:
+**GTA VI · El mundo entra a Vice City**. Descripción: seguimiento por país y
+cuenta regresiva del lanzamiento. Open Graph, favicon y 404 incluidos.
 
 ## Elecciones de diseño
 
