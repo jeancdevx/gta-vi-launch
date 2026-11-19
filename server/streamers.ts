@@ -7,7 +7,7 @@ import {
   streamLookupKey
 } from '../src/helpers/streamers.helpers.ts'
 
-type TwitchTokenCache = {
+type OAuthTokenCache = {
   token: string
   expiresAt: number
 }
@@ -34,7 +34,7 @@ type YouTubeVideoItem = {
   }
 }
 
-type KickChannelResponse = {
+type KickPublicChannelResponse = {
   livestream?: {
     is_live?: boolean
     session_title?: string
@@ -45,24 +45,43 @@ type KickChannelResponse = {
   } | null
 }
 
-let cachedTwitchToken: TwitchTokenCache | null = null
+type KickOfficialChannelItem = {
+  slug?: string
+  stream_title?: string
+  category?: { name?: string } | null
+  stream?: {
+    is_live?: boolean
+    viewer_count?: number
+    start_time?: string
+    thumbnail?: string
+  } | null
+}
 
-async function getTwitchAppToken(
+const DESKTOP_USER_AGENT =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+
+let cachedTwitchToken: OAuthTokenCache | null = null
+let cachedKickToken: OAuthTokenCache | null = null
+
+async function getOAuthAppToken(
+  tokenUrl: string,
   clientId: string,
-  clientSecret: string
-): Promise<string | null> {
-  if (cachedTwitchToken && Date.now() < cachedTwitchToken.expiresAt - 60_000)
-    return cachedTwitchToken.token
+  clientSecret: string,
+  currentCache: OAuthTokenCache | null
+): Promise<OAuthTokenCache | null> {
+  if (currentCache && Date.now() < currentCache.expiresAt - 60_000)
+    return currentCache
 
   const params = new URLSearchParams({
     client_id: clientId,
     client_secret: clientSecret,
     grant_type: 'client_credentials'
   })
-  const response = await fetch('https://id.twitch.tv/oauth2/token', {
+  const response = await fetch(tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: params
+    body: params,
+    signal: AbortSignal.timeout(5000)
   })
 
   if (!response.ok) return null
@@ -74,12 +93,10 @@ async function getTwitchAppToken(
 
   if (!payload.access_token) return null
 
-  cachedTwitchToken = {
+  return {
     token: payload.access_token,
     expiresAt: Date.now() + (payload.expires_in ?? 3600) * 1000
   }
-
-  return cachedTwitchToken.token
 }
 
 async function fetchTwitchLiveMap(
@@ -87,9 +104,14 @@ async function fetchTwitchLiveMap(
   clientId: string,
   clientSecret: string
 ): Promise<Record<string, LiveStreamStatus>> {
-  const token = await getTwitchAppToken(clientId, clientSecret)
+  cachedTwitchToken = await getOAuthAppToken(
+    'https://id.twitch.tv/oauth2/token',
+    clientId,
+    clientSecret,
+    cachedTwitchToken
+  )
 
-  if (!token) return {}
+  if (!cachedTwitchToken) return {}
 
   const liveMap: Record<string, LiveStreamStatus> = {}
 
@@ -104,8 +126,9 @@ async function fetchTwitchLiveMap(
       {
         headers: {
           'Client-Id': clientId,
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${cachedTwitchToken.token}`
+        },
+        signal: AbortSignal.timeout(5000)
       }
     )
 
@@ -143,25 +166,30 @@ async function detectYouTubeLiveVideoId(
       `https://www.youtube.com/channel/${channelId}/live`,
       {
         headers: {
-          'User-Agent': 'Mozilla/5.0',
-          'Accept-Language': 'en-US,en;q=0.9'
+          'User-Agent': DESKTOP_USER_AGENT,
+          'Accept-Language': 'en-US,en;q=0.9',
+          Cookie: 'SOCS=CAI'
         },
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(5500)
       }
     )
 
     if (!response.ok) return null
 
     const html = await response.text()
-    const isLiveNow = html.includes('"isLiveNow":true')
-
-    if (!isLiveNow) return null
-
-    const match = html.match(
+    const canonicalMatch = html.match(
       /<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})"/
     )
 
-    return match?.[1] ?? null
+    if (canonicalMatch?.[1]) return canonicalMatch[1]
+
+    if (html.includes('"isLive":true') || html.includes('"isLiveNow":true')) {
+      const videoIdMatch = html.match(/"videoId":"([A-Za-z0-9_-]{11})"/)
+
+      return videoIdMatch?.[1] ?? null
+    }
+
+    return null
   } catch {
     return null
   }
@@ -196,7 +224,7 @@ async function fetchYouTubeLiveMap(
     })
     const response = await fetch(
       `https://www.googleapis.com/youtube/v3/videos?${query.toString()}`,
-      { signal: AbortSignal.timeout(4000) }
+      { signal: AbortSignal.timeout(5500) }
     )
 
     if (!response.ok) continue
@@ -211,13 +239,12 @@ async function fetchYouTubeLiveMap(
       const title = item.snippet.title ?? ''
       const viewersRaw = Number(item.liveStreamingDetails?.concurrentViewers)
       const key = streamLookupKey('youtube', handle)
+      const playingGtaVi = isGtaViGame('', title)
 
       liveMap[key] = {
         live: true,
-        playingGtaVi: isGtaViGame('', title),
-        gameName: isGtaViGame('', title)
-          ? 'Grand Theft Auto VI'
-          : 'YouTube Live',
+        playingGtaVi,
+        gameName: playingGtaVi ? 'Grand Theft Auto VI' : 'YouTube Live',
         title,
         viewers: Number.isFinite(viewersRaw) ? viewersRaw : undefined,
         startedAt: item.liveStreamingDetails?.actualStartTime,
@@ -230,49 +257,132 @@ async function fetchYouTubeLiveMap(
   return liveMap
 }
 
+async function fetchKickOfficialLiveMap(
+  slugs: string[],
+  clientId: string,
+  clientSecret: string
+): Promise<Record<string, LiveStreamStatus> | null> {
+  cachedKickToken = await getOAuthAppToken(
+    'https://id.kick.com/oauth/token',
+    clientId,
+    clientSecret,
+    cachedKickToken
+  )
+
+  if (!cachedKickToken) return null
+
+  const query = new URLSearchParams()
+
+  for (const slug of slugs) query.append('slug', slug)
+
+  const response = await fetch(
+    `https://api.kick.com/public/v1/channels?${query.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${cachedKickToken.token}`,
+        Accept: 'application/json'
+      },
+      signal: AbortSignal.timeout(5000)
+    }
+  )
+
+  if (!response.ok) return null
+
+  const payload = (await response.json()) as {
+    data?: KickOfficialChannelItem[]
+  }
+  const liveMap: Record<string, LiveStreamStatus> = {}
+
+  for (const channel of payload.data ?? []) {
+    if (!channel.slug || !channel.stream?.is_live) continue
+
+    const category = channel.category?.name ?? ''
+    const title = channel.stream_title ?? ''
+    const key = streamLookupKey('kick', channel.slug)
+
+    liveMap[key] = {
+      live: true,
+      playingGtaVi: isGtaViGame(category, title),
+      gameName: category || 'Kick Live',
+      title,
+      viewers: channel.stream.viewer_count,
+      startedAt: channel.stream.start_time,
+      thumbnailUrl: channel.stream.thumbnail,
+      risk: classifySpoilerRisk(title)
+    }
+  }
+
+  return liveMap
+}
+
+async function fetchKickPublicChannel(
+  slug: string
+): Promise<KickPublicChannelResponse | null> {
+  const headers = {
+    'User-Agent': DESKTOP_USER_AGENT,
+    Accept: 'application/json',
+    Referer: 'https://kick.com/',
+    Origin: 'https://kick.com'
+  }
+
+  for (const version of ['v2', 'v1']) {
+    try {
+      const response = await fetch(
+        `https://kick.com/api/${version}/channels/${slug}`,
+        {
+          headers,
+          signal: AbortSignal.timeout(5000)
+        }
+      )
+
+      if (!response.ok) continue
+
+      return (await response.json()) as KickPublicChannelResponse
+    } catch {
+      /* Try next endpoint version. */
+    }
+  }
+
+  return null
+}
+
 async function fetchKickLiveMap(
-  slugs: string[]
+  slugs: string[],
+  clientId: string,
+  clientSecret: string
 ): Promise<Record<string, LiveStreamStatus>> {
+  if (clientId && clientSecret) {
+    const official = await fetchKickOfficialLiveMap(
+      slugs,
+      clientId,
+      clientSecret
+    ).catch(() => null)
+
+    if (official) return official
+  }
+
   const liveMap: Record<string, LiveStreamStatus> = {}
 
   await Promise.all(
     slugs.map(async slug => {
-      try {
-        const response = await fetch(
-          `https://kick.com/api/v2/channels/${slug}`,
-          {
-            headers: {
-              'User-Agent':
-                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
-              Accept: 'application/json'
-            },
-            signal: AbortSignal.timeout(3500)
-          }
-        )
+      const payload = await fetchKickPublicChannel(slug)
+      const stream = payload?.livestream
 
-        if (!response.ok) return
+      if (!stream?.is_live) return
 
-        const payload = (await response.json()) as KickChannelResponse
-        const stream = payload.livestream
+      const category = stream.categories?.[0]?.name ?? ''
+      const title = stream.session_title ?? ''
+      const key = streamLookupKey('kick', slug)
 
-        if (!stream?.is_live) return
-
-        const category = stream.categories?.[0]?.name ?? ''
-        const title = stream.session_title ?? ''
-        const key = streamLookupKey('kick', slug)
-
-        liveMap[key] = {
-          live: true,
-          playingGtaVi: isGtaViGame(category, title),
-          gameName: category || 'Kick Live',
-          title,
-          viewers: stream.viewer_count,
-          startedAt: stream.created_at,
-          thumbnailUrl: stream.thumbnail?.url,
-          risk: classifySpoilerRisk(title)
-        }
-      } catch {
-        /* Kick public endpoint can be rate-limited from serverless IPs. */
+      liveMap[key] = {
+        live: true,
+        playingGtaVi: isGtaViGame(category, title),
+        gameName: category || 'Kick Live',
+        title,
+        viewers: stream.viewer_count,
+        startedAt: stream.created_at,
+        thumbnailUrl: stream.thumbnail?.url,
+        risk: classifySpoilerRisk(title)
       }
     })
   )
@@ -284,10 +394,13 @@ export async function GET(): Promise<Response> {
   const twitchId = process.env.TWITCH_CLIENT_ID?.trim() ?? ''
   const twitchSecret = process.env.TWITCH_CLIENT_SECRET?.trim() ?? ''
   const youtubeKey = process.env.YOUTUBE_API_KEY?.trim() ?? ''
+  const kickId = process.env.KICK_CLIENT_ID?.trim() ?? ''
+  const kickSecret = process.env.KICK_CLIENT_SECRET?.trim() ?? ''
   const enableKick = process.env.ENABLE_KICK_LIVE !== 'false'
   const hasTwitch = Boolean(twitchId && twitchSecret)
   const hasYouTube = Boolean(youtubeKey)
-  const configured = hasTwitch || hasYouTube
+  const hasKickOfficial = Boolean(kickId && kickSecret)
+  const configured = hasTwitch || hasYouTube || hasKickOfficial
   const tracked = getAllTrackedChannels()
 
   const [twitchLive, youtubeLive, kickLive] = await Promise.all([
@@ -299,8 +412,8 @@ export async function GET(): Promise<Response> {
     hasYouTube
       ? fetchYouTubeLiveMap(tracked.youtube, youtubeKey).catch(() => ({}))
       : Promise.resolve({}),
-    configured && enableKick
-      ? fetchKickLiveMap(tracked.kick).catch(() => ({}))
+    configured && (enableKick || hasKickOfficial)
+      ? fetchKickLiveMap(tracked.kick, kickId, kickSecret).catch(() => ({}))
       : Promise.resolve({})
   ])
 
@@ -311,7 +424,7 @@ export async function GET(): Promise<Response> {
     providers: {
       twitch: hasTwitch,
       youtube: hasYouTube,
-      kick: configured && enableKick
+      kick: configured && (enableKick || hasKickOfficial)
     },
     live: {
       ...kickLive,
