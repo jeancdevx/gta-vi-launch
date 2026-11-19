@@ -76,6 +76,28 @@ publica el 19 de noviembre de 2026 a medianoche local para PS5 y Xbox Series
 X|S. El código convierte la medianoche con `Intl.DateTimeFormat` y zonas IANA,
 incluyendo horario de verano y offsets fraccionarios.
 
+## Radar de streamers y escudo sin spoilers
+
+- `src/helpers/streamers.helpers.ts` mantiene el catálogo curado de 5 creadores
+  por país (con respaldo regional transparente en territorios sin top 5 local) y
+  la clasificación de riesgo de spoiler.
+- `api/streamers.ts` expone el endpoint serverless `/api/streamers` para Vercel
+  con caché de 60 segundos (`s-maxage=60, stale-while-revalidate=120`). En
+  desarrollo local (`pnpm dev`), `astro.config.mjs` monta automáticamente el
+  mismo endpoint leyendo `.env`.
+- Copia `.env.example` a `.env` (o añade las mismas variables en tu proyecto de
+  Vercel):
+
+```sh
+TWITCH_CLIENT_ID=...
+TWITCH_CLIENT_SECRET=...
+YOUTUBE_API_KEY=...       # Opcional, para canales de YouTube en vivo
+ENABLE_KICK_LIVE=true     # Opcional, para canales de Kick en vivo
+```
+
+Sin esas variables, la interfaz opera en **modo directorio** con enlaces
+verificados y nunca fabrica espectadores ni estados en vivo falsos.
+
 Cada país tiene una **ciudad de referencia**. Las zonas adicionales son
 conversiones del horario local y no una verificación de cada tienda. La
 disponibilidad que muestra la página significa que pasó la hora calculada, no
