@@ -52,7 +52,6 @@ export function createStreamerRadar(
   let activeFilter: RadarFilter = 'all'
   let spoilerShield = false
   let apiMode: 'loading' | 'live' | 'directory' = 'loading'
-  let apiUpdatedAt = ''
   let liveByKey: Record<string, LiveStreamStatus> = {}
 
   try {
@@ -107,7 +106,7 @@ export function createStreamerRadar(
     }
   }
 
-  function renderApiBanner() {
+  function renderApiBanner(region: Region) {
     if (!apiStatusEl) return
 
     if (apiMode === 'loading') {
@@ -123,19 +122,12 @@ export function createStreamerRadar(
       return
     }
 
-    const totalLiveGta = Object.values(liveByKey).filter(
-      item => item.live && item.playingGtaVi
-    ).length
-    const timeLabel = apiUpdatedAt
-      ? new Intl.DateTimeFormat('es', {
-          hour: '2-digit',
-          minute: '2-digit'
-        }).format(new Date(apiUpdatedAt))
-      : ''
+    const summary = getCountrySummary(region.id)
 
-    apiStatusEl.textContent = `Radar en vivo activo · ${totalLiveGta} ${
-      totalLiveGta === 1 ? 'creador' : 'creadores'
-    } en GTA VI${timeLabel ? ` · Act. ${timeLabel}` : ''}`
+    apiStatusEl.textContent =
+      summary.liveGtaVi > 0
+        ? `${summary.liveGtaVi} de ${summary.total} canales de ${region.country} en GTA VI ahora`
+        : `Ningún canal de ${region.country} está en GTA VI ahora`
   }
 
   function buildCreatorRow(creator: StreamerProfile, index: number) {
@@ -409,7 +401,7 @@ export function createStreamerRadar(
       )
     }
 
-    renderApiBanner()
+    renderApiBanner(region)
 
     const filtered = roster.streamers.filter(creator => {
       const status = getStatus(creator)
@@ -475,7 +467,6 @@ export function createStreamerRadar(
       const data = (await response.json()) as StreamersApiResponse
 
       apiMode = data.mode === 'live' && data.configured ? 'live' : 'directory'
-      apiUpdatedAt = data.updatedAt ?? ''
       liveByKey = data.live ?? {}
       render()
       onLiveChange()
