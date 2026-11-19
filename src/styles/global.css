@@ -132,6 +132,19 @@
   text-transform: uppercase;
 }
 
+/* Shared by the table header and every row so the columns align like a ruler. */
+@utility country-cols {
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1rem;
+
+  @media (width >= 768px) {
+    grid-template-columns:
+      2rem minmax(0, 1.9fr) minmax(0, 0.7fr) minmax(0, 1.1fr)
+      2.5rem;
+    column-gap: 1.5rem;
+  }
+}
+
 @utility field {
   width: 100%;
   border: 1px solid color-mix(in oklab, var(--ink) 28%, transparent);
