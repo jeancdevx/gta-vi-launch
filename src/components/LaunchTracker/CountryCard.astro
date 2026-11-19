@@ -20,7 +20,7 @@ const offset = utcOffsetLabel(region.zone)
 >
   <div class='col-start-1 row-start-1 flex min-w-0 items-center gap-3 md:col-start-1'>
     <span
-      class='w-6 shrink-0 text-[0.625rem] text-[#8f839b] tabular-nums group-data-[selected=true]:text-vice'
+      class='hidden w-6 shrink-0 text-[0.625rem] text-[#8f839b] tabular-nums group-data-[selected=true]:text-vice md:inline'
       aria-hidden='true'
     >
       {String(index + 1).padStart(2, '0')}
@@ -51,7 +51,7 @@ const offset = utcOffsetLabel(region.zone)
 
   <div class='col-start-2 row-start-1 text-right md:col-start-3 md:text-left'>
     <p
-      class='country-timer text-sm leading-5 font-semibold tracking-[-0.01em] whitespace-nowrap text-[#e9dfee] tabular-nums group-data-[available=true]:text-mint'
+      class='country-timer text-xs leading-4 font-semibold tracking-[-0.01em] whitespace-nowrap text-[#e9dfee] tabular-nums group-data-[available=true]:text-mint md:text-sm md:leading-5'
       role='timer'
     >
       19 nov · 00:00
