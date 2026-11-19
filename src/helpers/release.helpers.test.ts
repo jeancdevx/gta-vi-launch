@@ -3,7 +3,17 @@ import { test } from 'node:test'
 
 import { alternateZones, regions } from '../constants.ts'
 
-import { clockState, durationLabel, releaseInstant } from './release.helpers.ts'
+import {
+  clockState,
+  coarseDurationLabel,
+  compactDurationLabel,
+  detailedClockState,
+  durationLabel,
+  getLaunchPhase,
+  releaseInstant,
+  solarDeclination,
+  solarMidnightLongitude
+} from './release.helpers.ts'
 
 test('launch instants use regional DST, half-hour and quarter-hour offsets', () => {
   const examples = [
@@ -62,4 +72,63 @@ test('all countries and additional zones have valid unique definitions', () => {
     for (const extra of alternateZones[region.id] ?? [])
       assert.ok(Number.isFinite(releaseInstant(extra.zone)))
   }
+})
+
+test('launch phase transitions across countdown, wave and live eras', () => {
+  const instants = regions.map(region => releaseInstant(region.zone))
+
+  assert.equal(
+    getLaunchPhase(instants, Date.parse('2026-11-18T10:00:00Z')),
+    'countdown'
+  )
+  assert.equal(
+    getLaunchPhase(instants, Date.parse('2026-11-18T16:00:00Z')),
+    'wave'
+  )
+  assert.equal(
+    getLaunchPhase(instants, Date.parse('2026-11-19T12:00:00Z')),
+    'live'
+  )
+
+  const afterTenDays = detailedClockState(
+    Date.parse('2026-11-19T05:00:00Z'),
+    Date.parse('2026-11-29T08:15:30Z')
+  )
+
+  assert.deepEqual(afterTenDays, {
+    available: true,
+    days: 10,
+    hours: 3,
+    totalHours: 243,
+    minutes: 15,
+    seconds: 30
+  })
+  assert.equal(
+    compactDurationLabel(
+      Date.parse('2026-11-19T05:00:00Z'),
+      Date.parse('2026-11-29T08:15:30Z')
+    ),
+    'Hace 10 d 03 h 15 m'
+  )
+  assert.equal(
+    coarseDurationLabel(
+      Date.parse('2026-11-19T05:00:00Z'),
+      Date.parse('2026-11-19T23:04:41Z')
+    ),
+    'Hace 18 h 04 m'
+  )
+  assert.equal(
+    coarseDurationLabel(
+      Date.parse('2026-11-19T05:00:00Z'),
+      Date.parse('2026-11-19T05:00:21Z')
+    ),
+    'Hace 00 m 21 s'
+  )
+
+  const midnightLon = solarMidnightLongitude(Date.parse('2026-11-19T00:00:00Z'))
+
+  assert.equal(midnightLon, 0)
+  assert.ok(
+    Math.abs(solarDeclination(Date.parse('2026-11-19T00:00:00Z'))) <= 23.5
+  )
 })

@@ -47,6 +47,8 @@ export function releaseInstant(
   throw new Error(`No se pudo resolver la medianoche en ${zone}`)
 }
 
+export type LaunchPhase = 'countdown' | 'wave' | 'live'
+
 export function clockState(instant: number, now: number = Date.now()) {
   const available = now >= instant
   // A future countdown rounds up so a region never reads 00:00:00 before unlock.
@@ -60,6 +62,54 @@ export function clockState(instant: number, now: number = Date.now()) {
     minutes: Math.floor(total / 60) % 60,
     seconds: total % 60
   }
+}
+
+export function detailedClockState(instant: number, now: number = Date.now()) {
+  const base = clockState(instant, now)
+  const days = Math.floor(base.hours / 24)
+
+  return {
+    available: base.available,
+    days,
+    hours: base.hours % 24,
+    totalHours: base.hours,
+    minutes: base.minutes,
+    seconds: base.seconds
+  }
+}
+
+export function getLaunchPhase(
+  instants: number[],
+  now: number = Date.now()
+): LaunchPhase {
+  let availableCount = 0
+
+  for (const instant of instants) {
+    if (now >= instant) availableCount++
+  }
+
+  if (availableCount === 0) return 'countdown'
+
+  if (availableCount >= instants.length) return 'live'
+
+  return 'wave'
+}
+
+/** Approximate geographic longitude (in degrees, -180..180) currently at solar midnight. */
+export function solarMidnightLongitude(now: number = Date.now()): number {
+  const utcDayFraction = (((now / 86_400_000) % 1) + 1) % 1
+  const raw = -utcDayFraction * 360
+
+  return ((raw + 540) % 360) - 180
+}
+
+/** Approximate solar declination in degrees for drawing the real-time night terminator. */
+export function solarDeclination(now: number = Date.now()): number {
+  const date = new Date(now)
+  const startOfYear = Date.UTC(date.getUTCFullYear(), 0, 1)
+  const dayOfYear = (now - startOfYear) / 86_400_000
+
+  return -23.44 * Math.cos(((2 * Math.PI) / 365) * (dayOfYear + 10))
 }
 
 /** Human-readable offset at the release instant, e.g. UTC−05:00. */
@@ -87,4 +137,34 @@ export function durationLabel(
   const pad = (n: number) => String(n).padStart(2, '0')
 
   return `${available ? 'Hace' : 'Faltan'} ${pad(hours)} h ${pad(minutes)} m ${pad(seconds)} s`
+}
+
+export function compactDurationLabel(
+  instant: number,
+  now: number = Date.now()
+): string {
+  const state = detailedClockState(instant, now)
+  const pad = (n: number) => String(n).padStart(2, '0')
+
+  if (state.days >= 2)
+    return `${state.available ? 'Hace' : 'Faltan'} ${state.days} d ${pad(state.hours)} h ${pad(state.minutes)} m`
+
+  return durationLabel(instant, now)
+}
+
+/** Calmer board label: minutes precision once the hour has passed or is near. */
+export function coarseDurationLabel(
+  instant: number,
+  now: number = Date.now()
+): string {
+  const state = detailedClockState(instant, now)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const prefix = state.available ? 'Hace' : 'Faltan'
+
+  if (state.days >= 2) return `${prefix} ${state.days} d ${pad(state.hours)} h`
+
+  if (state.totalHours >= 1)
+    return `${prefix} ${pad(state.totalHours)} h ${pad(state.minutes)} m`
+
+  return `${prefix} ${pad(state.minutes)} m ${pad(state.seconds)} s`
 }
