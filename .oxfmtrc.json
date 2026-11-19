@@ -41,6 +41,7 @@
     ".taste-skill/**",
     "public/**",
     "**/dist/**",
+    "api/**",
     "**/.astro/**",
     "pnpm-lock.yaml",
     "skills-lock.json",
