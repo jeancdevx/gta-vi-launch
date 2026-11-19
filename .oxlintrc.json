@@ -98,7 +98,13 @@
       }
     ]
   },
-  "ignorePatterns": ["**/dist/**", ".agents/**", "**/.astro/**", ".husky/_/**"],
+  "ignorePatterns": [
+    "**/dist/**",
+    "api/**",
+    ".agents/**",
+    "**/.astro/**",
+    ".husky/_/**"
+  ],
   "overrides": [
     {
       "files": ["src/components/ui/**"],
