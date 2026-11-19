@@ -1,0 +1,92 @@
+---
+import Icon from '@/components/Icon'
+
+import { officialMilestones } from './LaunchMilestones.constants'
+---
+
+<section
+  id='hitos'
+  class='wrap border-t border-line pt-24 pb-24 max-[600px]:pt-16 max-[600px]:pb-16'
+  aria-labelledby='milestones-title'
+>
+  <div
+    class='flex items-end justify-between gap-12 max-[900px]:flex-col max-[900px]:items-start max-[900px]:gap-6'
+    data-reveal
+  >
+    <div>
+      <p class='eyebrow text-peach'>RADAR OFICIAL POST LANZAMIENTO</p>
+      <h2
+        id='milestones-title'
+        class='mt-6 max-w-[680px] text-5xl leading-none font-semibold tracking-[-0.04em] max-[600px]:mt-4 max-[600px]:text-4xl max-[600px]:leading-10'
+      >
+        Lo que sigue en
+        <br />
+        <span class='text-vice'>Leonida.</span>
+      </h2>
+    </div>
+    <p class='max-w-[380px] text-base leading-6 text-muted max-[900px]:max-w-[480px]'>
+      Seguimiento verificado de los próximos hitos oficiales. Solo fechas y
+      enlaces publicados por Rockstar Games.
+    </p>
+  </div>
+
+  <div
+    class='mt-14 grid grid-cols-1 border-t border-line max-[600px]:mt-10 md:grid-cols-2 xl:grid-cols-4'
+    data-reveal
+  >
+    {officialMilestones.map(item => (
+      <article
+        class='flex flex-col justify-between border-b border-line py-8 md:odd:border-r md:odd:pr-8 md:even:pl-8 xl:border-r xl:border-b-0 xl:px-7 xl:first:pl-0 xl:last:border-r-0 xl:last:pr-0'
+        data-milestone={item.id}
+      >
+        <div>
+          <div class='flex items-center justify-between gap-3'>
+            <span class='text-xs font-semibold tracking-[0.18em] text-vice'>
+              {item.step}
+            </span>
+            <span
+              class:list={[
+                'border px-2 py-0.5 text-[0.625rem] leading-4 font-semibold tracking-[0.1em] uppercase',
+                item.status === 'scheduled'
+                  ? 'border-mint/40 text-mint'
+                  : item.status === 'tracking'
+                    ? 'border-peach/40 text-peach'
+                    : 'border-white/20 text-muted'
+              ]}
+              data-milestone-badge={item.id}
+            >
+              {item.statusLabel}
+            </span>
+          </div>
+
+          <h3 class='mt-5 text-xl leading-7 font-semibold text-ink'>
+            {item.title}
+          </h3>
+          <p class='mt-1.5 text-xs leading-4 font-semibold tracking-[0.06em] text-peach uppercase'>
+            {item.dateLabel}
+          </p>
+          <p class='mt-4 text-sm leading-6 text-muted'>{item.summary}</p>
+
+          {item.spoilerNote && (
+            <p
+              class='milestone-spoiler-note mt-3 border-l-2 border-vice/45 pl-3 text-xs leading-4 text-[#d5c5d8]'
+              data-spoiler-sensitive='true'
+            >
+              {item.spoilerNote}
+            </p>
+          )}
+        </div>
+
+        <a
+          href={item.sourceUrl}
+          target='_blank'
+          rel='noopener noreferrer'
+          class='mt-6 inline-flex min-h-10 items-center gap-2 text-xs leading-4 font-semibold tracking-[0.06em] text-vice uppercase underline underline-offset-4 transition-colors duration-150 ease-out hover:text-peach focus-visible:outline-offset-4'
+        >
+          {item.sourceLabel}
+          <Icon name='external' size={14} class='shrink-0' />
+        </a>
+      </article>
+    ))}
+  </div>
+</section>
