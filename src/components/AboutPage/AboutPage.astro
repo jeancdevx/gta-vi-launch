@@ -77,13 +77,13 @@ import { release } from '@/constants'
     <h2 class='mt-12 text-2xl leading-8 max-[600px]:mt-8'>Privacidad</h2>
     <p class='mt-4 leading-7 text-muted'>
       Esta página no utiliza analítica ni solicita tu ubicación geográfica.
-      Puede guardar el país y la zona que eliges en el almacenamiento local de
-      tu navegador. Usa el botón de abajo para borrar esa preferencia. Si los
-      assets aún no están descargados localmente, el navegador los solicita a
-      GitHub o Rockstar, que reciben los datos habituales de una petición web.
+      Puede guardar el país, la zona y la preferencia del escudo sin spoilers en
+      el almacenamiento local de tu navegador. Usa el botón de abajo para borrar
+      esas preferencias. El radar de streamers consulta únicamente el endpoint
+      público del servidor sin datos personales.
     </p>
     <Button variant='secondary' id='forget-region' class='mt-6'>
-      Borrar mi región guardada
+      Borrar mis preferencias guardadas
     </Button>
     <p id='forget-feedback' role='status' class='mt-4 text-sm text-mint'></p>
 
@@ -104,9 +104,10 @@ import { release } from '@/constants'
 
       try {
         localStorage.removeItem('gta-vi-region')
+        localStorage.removeItem('gta-vi-spoiler-shield')
 
         if (feedback)
-          feedback.textContent = 'Tu preferencia guardada se ha eliminado.'
+          feedback.textContent = 'Tus preferencias guardadas se han eliminado.'
       } catch {
         if (feedback)
           feedback.textContent =
