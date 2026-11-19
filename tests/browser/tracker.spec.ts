@@ -7,6 +7,7 @@ test.beforeEach(async ({ page }) => {
   )
   await page.route('https://www.rockstargames.com/**', route => route.abort())
   await page.clock.install({ time: new Date('2026-11-18T16:00:00Z') })
+  await page.clock.pauseAt(new Date('2026-11-18T16:00:00Z'))
   await page.goto('/?country=pe')
 })
 
