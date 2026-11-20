@@ -198,6 +198,11 @@
       animation: none;
     }
 
+    .radar-sweep-beam {
+      animation: none !important;
+      opacity: 0;
+    }
+
     .map-signal-arc,
     .map-blip-ring {
       animation: none !important;
@@ -243,6 +248,11 @@
     animation: radar-arc-flow 1.8s linear infinite;
   }
 
+  .radar-sweep-beam {
+    animation: radar-sweep 11s linear infinite;
+    will-change: transform;
+  }
+
   .map-blip[aria-pressed='true'] .map-blip-ring,
   .map-blip[data-live='true'] .map-blip-ring {
     animation: radar-pulse 2.4s var(--ease-out-custom) infinite;
@@ -264,6 +274,16 @@
   :root[data-spoiler-shield='true']
     [data-spoiler-sensitive='true']:focus-visible {
     filter: blur(0);
+  }
+
+  @keyframes radar-sweep {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(1360px);
+    }
   }
 
   @keyframes radar-pulse {
